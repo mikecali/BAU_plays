@@ -1,0 +1,47 @@
+---
+- hosts: localhost
+  user: root
+  become: yes
+
+  
+
+  #Define user and password variables
+  vars:
+    password : [] 
+    user : []
+
+  vars_prompt:
+    - name: user
+      prompt: "please provide the username"
+      private: no
+ 
+    - name: password
+      prompt: "please provide password"
+      private: yes
+      encrypt: "md5_crypt" #need to have python-passlib installed in local machine before we can use it    
+      confirm: yes    
+      salt_size: 7
+
+
+  # Define task to add user
+  tasks:
+    - name: add user
+      action: user name={{ user }} password={{ password }} update_password=always shell=/bin/bash home=/home/{{ user }} group=admin
+      tags:
+        - useradd
+    
+    - name: Creating a copy
+      command: cp -f /etc/sudoers /etc/sudoers.tmp ## copy a backup
+   
+
+    - name: create a backup
+      command: cp -f /etc/sudoers /etc/sudoers.bak  ## create a backup
+      
+    - name: make sure we can sudo as admin group
+      lineinfile: dest=/etc/sudoers.tmp state=present regexp='^%admin' line='%admin ALL=(ALL) ALL'
+
+    - name: also make sure ssh-agent works via sudo
+      lineinfile: dest=/etc/sudoers.tmp state=present regexp='^Defaults env_keep\+\=SSH_AUTH_SOCK' line='Defaults env_keep+=SSH_AUTH_SOCK'
+
+    - name: Final sudoers file check
+      shell: visudo -q -c -f /etc/sudoers.tmp && cp -f /etc/sudoers.tmp /etc/sudoers

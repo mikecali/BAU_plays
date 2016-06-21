@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  user: root
+  sudo: no
+
+  
+
+  #Define user and password variables
+  vars:
+    user : []
+
+  vars_prompt:
+    - name: user
+      prompt: "please provide the username"
+      private: no
+
+  # Define task to add user
+  tasks:
+    - name: add user
+      action: user name={{ user }} state=absent remove=yes
+      tags:
+        - userdel
