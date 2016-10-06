@@ -1,0 +1,60 @@
+- name: Get all the usernames
+  shell: "awk -F':' '{ print $1}' /etc/passwd"
+  register: all_users
+
+- name: Get all the different types of users
+  script: user.list.sh
+  register: grouped_users
+  become: yes
+
+#- name: Get latest git commit number
+#  shell: git log --format="%H" -n 1
+#  register: latest_git_commit
+#  delegate_to: 127.0.0.1
+
+- include: sys_info.yml
+- include: hardware_info.yml
+- include: filesystem_info.yml
+- include: volumes_info.yml
+- include: network_info.yml
+- include: security_info.yml
+- include: logging_info.yml
+- include: patching_info.yml
+- include: monitoring_info.yml
+- include: software_info.yml
+- include: user_info.yml
+
+- name: Get kickstart details
+  command: cat /root/anaconda-ks.cfg
+  register: kickstart
+
+- include: redhat_7.yml
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == '7'
+
+- include: redhat_6.yml
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == '6'
+
+- name: Get current date time
+  shell: date +"%Y%m%d%H%M%S"
+  register: current_date_time
+
+- name: Template file
+  template: src=as_built.md.j2 dest=/var/tmp/{{ client_name }}-{{ hostname.stdout }}-{{ current_date_time.stdout }}.md
+
+- name: Fetch file from remote server
+  fetch: flat=yes src=/var/tmp/{{ client_name }}-{{ hostname.stdout }}-{{ current_date_time.stdout }}.md dest={{ git_repo_location }}/{{ client_name }}/{{ project_name }}/Asbuilt-{{ client_name }}-{{ hostname.stdout }}-{{ current_date_time.stdout }}.md
+
+# - name: Add the new asbuilt doc to git
+#   shell: git add /{{ client_name }}/{{ client_name }}-{{ hostname.stdout }}-{{ current_date_time.stdout }}.md
+#   args:
+#     chdir: "{{ git_repo_location }}"
+
+#- name: Commit new asbuilt doc to git
+#  shell: git commit -m "Add new asbuilt doc for {{ client_name }}-{{ hostname.stdout }}.md"
+#  args:
+#    chdir: "{{ git_repo_location }}"
+
+#- name: Push file to git repo
+#  shell: git push origin master
+#  args:
+#    chdir: "{{ git_repo_location }}"

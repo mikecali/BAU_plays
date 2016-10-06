@@ -1,0 +1,2 @@
+---
+os_update_exclusions: kernel*,samba4*

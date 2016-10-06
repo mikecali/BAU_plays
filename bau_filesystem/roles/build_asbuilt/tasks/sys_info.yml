@@ -1,0 +1,133 @@
+- name: Get hostname
+  shell: hostname 
+  register: hostname
+
+- name: Check os info
+  shell: cat /etc/redhat-release
+  register: os_details
+
+- name: Get kernel info 
+  shell: cat /proc/version 
+  register: kernel_details
+
+- name: Get limits.conf
+  shell: cat /etc/security/limits.conf
+  register: limits_conf_details_part_one
+
+- name: Get limits.d config file
+  shell: ls /etc/security/limits.d/*proc.conf
+  register: limits_conf_file_part_two
+
+- name: Get ulimits
+  shell: cat /etc/security/limits.d/90-nproc.conf
+  register: limits_conf_details_part_two_rhel6
+  when: ansible_distribution_major_version == "6"
+
+- name: Get ulimits
+  shell: cat /etc/security/limits.d/20-nproc.conf
+  register: limits_conf_details_part_two_rhel7
+  when: ansible_distribution_major_version == "7"
+
+- name: Get initttab details
+  shell: cat /etc/inittab | grep id
+  register: init_tab_details_rhel6
+  when: ansible_distribution_major_version == "6"
+
+- name: Get current run level
+  shell: systemctl get-default; runlevel
+  register: init_tab_details_rhel7
+  when: ansible_distribution_major_version == "7"
+
+- name: Get services run level
+  shell: chkconfig --list
+  register: services_run_level
+
+- name: Get group details
+  shell: cat /etc/group
+  register: group_details
+
+- name: Get the root user crontab details
+  shell: crontab -l
+  register: root_crontab_details
+  ignore_errors: true
+  become: yes
+
+- name: Get the crontab details of each user
+  shell: crontab -l
+  register: crontab_details
+  become_user: "{{ item }}"
+  with_items: "{{ all_users.stdout_lines }}"
+  ignore_errors: true
+
+- name: Get cron.allow details 
+  shell: cat /etc/cron.d/cron.allow
+  register: cron_allow_details
+  ignore_errors: true
+
+- name: Get cron.deny details 
+  shell: cat /etc/cron.d/cron.allow
+  register: cron_deny_details
+  ignore_errors: true
+
+- name: Get cron.daily details 
+  shell: cat /etc/cron.daily/*
+  register: cron_daily_details
+  ignore_errors: true
+
+- name: Get cron.hourly details 
+  shell: cat /etc/cron.hourly/*
+  register: cron_hourly_details
+  ignore_errors: true
+
+- name: Get cron.monthly details 
+  shell: cat /etc/cron.monthly/*
+  register: cron_monthly_details
+  ignore_errors: true
+
+- name: Get cron.weekly details 
+  shell: cat /etc/cron.weekly/*
+  register: cron_weekly_details
+  ignore_errors: true
+
+- name: Get user and group details of root
+  shell: cat /etc/passwd
+  register: root_user_details
+
+- name: Get home details
+  shell: "cat /etc/passwd | grep ^root"
+  register: home_details
+
+- name: Get user and group details of each user
+  shell: cat /etc/passwd | grep {{ item }} | cut -f 1,3,4,6 -d":"
+  register: all_user_details
+  with_items: "{{ all_users.stdout_lines }}"
+  ignore_errors: true
+
+- name: Get sudoers details
+  shell: cat /etc/sudoers
+  register: sudoers_details
+
+- name: Get extra sudoers details
+  shell: cat /etc/sudoers.d/*
+  register: extra_sudoers_details
+
+- name: Get samba confg details
+  shell: cat /etc/samba/smb.conf
+  register: samba_config_details
+
+- name: Get samba status
+  shell: smbstatus
+  register: samba_status
+  ignore_errors: true
+
+- name: Get Samba run level
+  shell: runlevel
+  register: samba_run_level
+
+- name: Get the login access control table file
+  shell: cat /etc/security/access.conf
+  register: login_access_control_table_details
+
+- name: Get config file for setting system variables
+  shell: cat /etc/sysctl.conf
+  register: system_ctl_conf_details

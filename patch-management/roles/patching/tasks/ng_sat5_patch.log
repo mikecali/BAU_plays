@@ -1,0 +1,10 @@
+2016-05-18 13:29:33,378 - ng_sat5_patch - INFO - Disabling notifications for host(s): ['kdctestguest99']
+2016-05-18 13:29:33,379 - ng_sat5_patch - DEBUG - CMK set downtime message: ['COMMAND [1463534973] SCHEDULE_HOST_DOWNTIME;kdctestguest99;1463534973;1463563773;1;0;28800;automation;"Patching"\n', 'COMMAND [1463534973] SCHEDULE_HOST_SVC_DOWNTIME;kdctestguest99;1463534973;1463563773;1;0;28800;automation;"Patching"\n']
+2016-05-18 13:29:33,406 - ng_sat5_patch - DEBUG - Sending CMK message ['COMMAND [1463534973] SCHEDULE_HOST_DOWNTIME;kdctestguest99;1463534973;1463563773;1;0;28800;automation;"Patching"\n', 'COMMAND [1463534973] SCHEDULE_HOST_SVC_DOWNTIME;kdctestguest99;1463534973;1463563773;1;0;28800;automation;"Patching"\n']
+2016-05-18 13:29:33,407 - ng_sat5_patch - INFO - reading livestatus results
+2016-05-18 13:29:37,497 - ng_sat5_patch - DEBUG - empty message returned from livestatus
+2016-05-18 13:29:42,038 - ng_sat5_patch - INFO - Enabling notifications for host(s):['kdctestguest99']
+2016-05-18 13:29:42,038 - ng_sat5_patch - DEBUG - CMK remove downtime message: ['COMMAND [1463534982] DEL_DOWNTIME_BY_HOST_NAME;kdctestguest99\n']
+2016-05-18 13:29:42,051 - ng_sat5_patch - DEBUG - Sending CMK message ['COMMAND [1463534982] DEL_DOWNTIME_BY_HOST_NAME;kdctestguest99\n']
+2016-05-18 13:29:42,051 - ng_sat5_patch - INFO - reading livestatus results
+2016-05-18 13:29:46,074 - ng_sat5_patch - DEBUG - empty message returned from livestatus

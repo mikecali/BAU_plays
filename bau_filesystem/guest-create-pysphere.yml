@@ -1,0 +1,150 @@
+# http://docs.ansible.com/ansible/vsphere_guest_module.html
+
+---
+- name: Create VMware guests using Pysphere
+  hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars:
+     instance_set: alabs-test
+     vsphere: alabs
+
+  pre_tasks:
+    - include_vars: ../../secrets/alabs-vsphere.yml
+    - include_vars: ../../vars/global-constants.yml
+    - include_vars: ../../vars/{{instance_set}}-instances.yml
+
+  tasks:
+  - name: Deploy guest from template using pyshere
+    vsphere_guest:
+      vcenter_hostname: "{{vcenter_hostname}}"
+      username: "{{vcenter_username}}"
+      password: "{{vcenter_password}}"
+      guest: "{{ item.name|upper }}"
+      from_template: yes
+      template_src: "{{ template }}"
+      cluster: G5-Cluster
+      resource_pool: "/Resources"
+      vm_disk: "{{ item.vm_disk }}"
+      vm_extra_config:
+        notes: Created by Ngito Ansible
+        folder: UDM-SIP
+      esxi:
+        datacenter: NextGenITO-ALABS
+        hostname: "{{ exsi_hostname }}"
+    with_items: instances
+    tags: ['clone']
+
+#  - name: debug
+#    debug: msg= "{{ item.vm_disk }}"
+#    with_items: instances
+
+  - name: Reconfigure the VM
+    vsphere_guest:
+      vcenter_hostname: "{{vcenter_hostname}}"
+      username: "{{vcenter_username}}"
+      password: "{{vcenter_password}}"
+      guest: "{{ item.name|upper }}"
+      force: yes
+      state: reconfigured
+      vm_extra_config:
+        vcpu.hotadd: yes
+        mem.hotadd: yes 
+        notes: Using PySphere
+        folder: "{{ folder }}"
+      vm_nic:
+        nic1:
+          type: vmxnet3
+          network: VM Network
+          network_type: standard
+        nic2:
+          type: vmxnet3
+          network: VM Network
+          network_type: standard
+      vm_hardware:
+        memory_mb: "{{ item.vm_hardware.memory_mb }}"
+        num_cpus: "{{ item.vm_hardware.num_cpus }}"
+        osid: RH6
+        scsi: paravirtual
+      vm_disk: "{{ item.vm_disk }}"
+#      vm_disk:
+#        disk1:
+#          size_gb: 80
+#          type: thin
+#          datastore: datastore2
+#        disk2:
+#          size_gb: 1
+#          type: thin
+#          datastore: datastore2
+#        disk3:
+#          size_gb: 2
+#          type: thin
+#          datastore: datastore2
+      esxi:
+        datacenter: NextGenITO-ALABS
+        hostname: "{{ exsi_hostname }}"
+    with_items: instances
+    tags: ['recon']
+    ignore_errors: yes
+
+  - pause: minutes=2
+
+#- name: Wait for server 
+#  hosts: localhost
+#  gather_facts: False
+#
+#  vars:
+#    vsphere: alabs
+#    instance_set: chorus-7.2
+#  
+#    pre_tasks:
+#      - include_vars: ../../vars/{{instance_set}}-instances.yml
+#
+#  tasks:
+#  - name: waiting for server to come back
+#      local_action: wait_for host = "{{ item.name|upper }}" state = started
+#      sudo: false
+#    with_items: instances 
+ 
+- name: Reconfigure VM network 
+  hosts: localhost
+  gather_facts: False
+
+  vars:
+    vsphere: alabs
+    instance_set: alabs-test
+    #instance_set: chorus-7.2
+
+    pre_tasks:
+      - include_vars: ../../secrets/{{vsphere}}-vsphere.yml
+      - include_vars: ../../vars/global-constants.yml
+      - include_vars: ../../vars/{{instance_set}}-instances.yml
+
+  tasks:
+  - name: Reconfigure instance neworking
+    vmware_vm_shell:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      datacenter: "{{ esxi_datacenter }}"
+      vm_id: "{{ item.name|upper }}"
+      vm_id_type: vm_name
+      vm_username: rhel
+      vm_password: datacom
+      vm_shell: /dnz_support/ngito-reconfigure-network.sh
+      vm_shell_args: " >> reconfigure-networking.log"
+      vm_shell_env:
+        - "RECONFIGURE_IPADDR={{item.ip}}"
+        - "RECONFIGURE_NETMASK={{netmask}}"
+        - "RECONFIGURE_GW={{gateway}}"
+        - "RECONFIGURE_NAME=ens32"
+        - "RECONFIGURE_DEVICE=ens32"
+        - "RECONFIGURE_ONBOOT=yes"
+        - "RECONFIGURE_TYPE=Ethernet"
+        - "RECONFIGURE_DNS1={{dns_1}}"
+        - "RECONFIGURE_BOOTPROTO=none"
+        - "REBOOT_ON_RECONFIGURE=true"
+      vm_shell_cwd: "/tmp"
+    with_items: instances
+    tags: ['network']

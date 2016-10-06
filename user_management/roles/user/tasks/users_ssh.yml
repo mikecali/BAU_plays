@@ -1,0 +1,121 @@
+# tasks file for user
+---
+- name: users | delete
+  user:
+    name: "{{ item.name }}"
+    state: "{{ item.state | default('absent') }}"
+  with_items: user_remove
+  when: user_remove is defined
+  tags:
+    - user-users-no-gid
+  register: user_del
+
+- name: users | deploy cleanup script
+  copy: src=recycle_home_directory.sh dest=/usr/local/bin/recycle_home_directory.sh mode=4775
+  when: user_del.changed
+
+- name: users | cleanup old home directory
+  shell: "/usr/local/bin/recycle_home_directory.sh {{ item.name }}"
+  with_items: user_remove
+  when: user_del.changed
+
+- name: users | add (no uid) no_ssh
+  user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default('') }}"
+    group: "{{ item.group | default(item.name) }}"
+    groups: "{{ item.groups | default([]) | join(',') }}"
+    append: "{{ item.append | default(false) }}"
+    password: "{{ item.password | default('*') }}"
+    update_password: "{{ item.update_password | default('always') }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    # default('~' + item.name) also seems to work, but is not idempotent
+    home: "{{ item.home | default(('/' if item.name == 'root' else '/home/') + item.name) }}"
+    system: "{{ item.system | default(false) }}"
+    state: "{{ item.state | default('present') }}"
+    remove: "{{ item.remove | default(false) }}"
+  when: item.uid is not defined and user_add is defined
+  with_items: user_add
+  tags:
+    - user-users-no-uid
+  register: user_created
+
+- name: users | add (no uid) with ssh
+  user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default('') }}"
+    group: "{{ item.group | default(item.name) }}"
+    groups: "{{ item.groups | default([]) | join(',') }}"
+    append: "{{ item.append | default(false) }}"
+    password: "{{ item.password | default('*') }}"
+    update_password: "{{ item.update_password | default('always') }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    # default('~' + item.name) also seems to work, but is not idempotent
+    home: "{{ item.home | default(('/' if item.name == 'root' else '/home/') + item.name) }}"
+    system: "{{ item.system | default(false) }}"
+    state: "{{ item.state | default('present') }}"
+    remove: "{{ item.remove | default(false) }}"
+  when: item.uid is not defined and user_add_ssh is defined
+  with_items: user_add_ssh
+  tags:
+    - user-users-no-uid
+  register: user_created_ssh
+
+# Remove when minimal Ansible version >= 1.8
+- name: users | add with UID and SSH Key
+  user:
+    name: "{{ item.name }}"
+    uid: "{{ item.uid }}"
+    comment: "{{ item.comment | default('') }}"
+    group: "{{ item.group | default(item.name) }}"
+    groups: "{{ item.groups | default([]) | join(',') }}"
+    append: "{{ item.append | default(false) }}"
+    password: "{{ item.password | default('*') }}"
+    generate_ssh_key: "{{ item.generate_ssh_key | default('no') }}"
+    update_password: "{{ item.update_password | default('always') }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    home: "{{ item.home | default(('/' if item.name == 'root' else '/home/') + item.name) }}"
+    system: "{{ item.system | default(false) }}"
+    state: "{{ item.state | default('present') }}"
+    remove: "{{ item.remove | default(false) }}"
+  when: item.uid is defined and user_add_ssh is defined
+  with_items: user_add_ssh
+  tags:
+    - user-users-uid-ssh
+  register: user_created_ssh
+
+- name: users | add with UID no SSH Key
+  user:
+    name: "{{ item.name }}"
+    uid: "{{ item.uid }}"
+    comment: "{{ item.comment | default('') }}"
+    group: "{{ item.group | default(item.name) }}"
+    groups: "{{ item.groups | default([]) | join(',') }}"
+    append: "{{ item.append | default(false) }}"
+    password: "{{ item.password | default('*') }}"
+    generate_ssh_key: "{{ item.generate_ssh_key | default('no') }}"
+    update_password: "{{ item.update_password | default('always') }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    home: "{{ item.home | default(('/' if item.name == 'root' else '/home/') + item.name) }}"
+    system: "{{ item.system | default(false) }}"
+    state: "{{ item.state | default('present') }}"
+    remove: "{{ item.remove | default(false) }}"
+  when: item.uid is defined and user_add is defined
+  with_items: user_add
+  tags:
+    - user-users-uid
+  register: user_created
+
+#- name: newopass debug
+#  debug: msg= "{{ item.name }}" "{{ user_created }}"
+#  with_items: user_add_ssh
+# 
+# - name: change password age (ssh)
+#   shell: chage -d 0 {{ item.name }}
+#   with_items: user_add_ssh
+#   when: user_add_ssh is defined and user_created_ssh is defined and user_created_ssh.changed
+#  
+# - name: change password age (nonssh)
+#   shell: chage -d 0 {{ item.name }}
+#   with_items: user_add
+#   when: user_add is defined and user_created is defined and user_created.changed

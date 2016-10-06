@@ -1,0 +1,602 @@
+# SERVER INFORMATION
+* Client - {{ client_name }}
+* Hostname - {{ hostname.stdout }}
+* Project Name: {{ project_name }}
+* GitLab URL: {{ gitlab_url }}
+* Playbook: {{ playbook_name }}
+* Inventory: inventory/as_built/{{ project_name }}
+* Location of Git on Server:  {{ git_repo_location }}
+* Variables utilised: project_name, gitlab_url, playbook_name, client_name, git_repo_location
+* Playbook to create VM shell: {{ playbook_create_vm }}
+* Playbook to build OS environment: {{ playbook_build_os }}
+* Playbook to hardened OS using CIS: {{ playbook_hardening }}
+* Playbook to create as-built document: {{ playbook_asbuilt }}
+
+# TABLE OF CONTENTS
+=========================================================
+* 1. Operating System Information
+* 2. System Configuration Information
+*   2.1: Security Limits Information
+*   2.2 Init tab Information
+*   2.3 Services Run Level
+*   2.4 Group File Information
+*   2.5 UserID/GID of Root User
+*   2.6 All UserID GID Information per user
+*   2.7 Sudoers Information
+*   2.8 Crontab Information
+*   2.9 Samba Information
+*   2.10 Login Access Control Table File Information
+*   2.11 System Variables Configuration File
+* 3. Harwdware Information
+*   3.1 CPU General Information
+*   3.2 CPU Processor Information
+*   3.3 Memory Information
+*   3.4 Sector Size of Partition Information
+* 4. File System Information
+*   4.1 Fstab Information
+*   4.2 Mounts Points
+*   4.3 Disk Information
+* 5. Logical Volumes Information
+*   5.1 Version Information
+*   5.2 Volume Group Information
+*   5.3 Logical Volume Information
+*   5.4 Physical Volumes Information
+*   5.5 Partition Information
+* 6. Network Configuration Information
+*   6.1 Interfaces and Configuration File
+*   6.2 DNS Configuration
+*   6.3 Routing Information
+*   6.4 Hostfile Information
+*   6.5 IP Forwarding Information
+* 7. Security Information
+*   7.1 Firewall Rules
+*   7.2 Host Allow File
+*   7.3 Host Deny File
+*   7.4 Login Group Allowed File
+*   7.5 Named Switch Configuration File
+*   7.6 NTP
+*   7.7 SSH Information
+*   7.8 SELINUX
+* 8. Logging Information
+*   8.1 Log Rotate Information
+*   8.2 Check state of rsyslog
+*   8.3 Remote Logging Configuration
+*   8.4 System Logging Configuration
+* 9. Patching Information
+*   9.1 Channels
+* 10. Monitoring Information
+*   10.1 check_mk Information
+*   10.2 xinetd enabled
+* 11. Software Information
+*   11.1 All Packages
+*   11.2 OS Specific Package Information
+* 12. Users Account Information
+*   12.1 Grouped Users
+*   12.2 Root User and Group Information
+*   12.3 User Account Information
+* 13. KickStart Information
+
+## 1. Operating System Information
+===========================================
+```
+OS - {{ os_details.stdout }}
+Kernel - {{ kernel_details.stdout }}
+```
+## 2. System Configuration Information
+===========================================
+
+### 2.1 Security Limits Information
+-------------------------------------------
+/etc/security/limits.conf file
+```
+{{ limits_conf_details_part_one.stdout }}
+```
+
+{{ limits_conf_file_part_two.stdout }}
+```
+{% if ansible_distribution_major_version == "6" %}
+{{ limits_conf_details_part_two_rhel6.stdout }}
+{% elif ansible_distribution_major_version == "7" %}
+{{ limits_conf_details_part_two_rhel7.stdout }}
+{% endif %}
+```
+### 2.2 Init tab Information or Current run level
+------------------------------------------
+```
+{% if ansible_distribution_major_version == "6" %}
+{{ init_tab_details_rhel6.stdout }}
+{% elif ansible_distribution_major_version == "7" %}
+{{ init_tab_details_rhel7.stdout }}
+{% endif %}
+```
+
+### 2.3 Services Run Level
+------------------------------------------
+```
+{% for line in services_run_level.stdout.splitlines() %}
+{{ line }}<br>
+{% endfor %}
+```
+
+### 2.4 Group File Information
+------------------------------------------
+```
+{{ group_details.stdout }}
+```
+
+### 2.5 . UserID/GID of Root User
+-------------------------------------------
+```
+{{ home_details.stdout }}
+```
+
+### 2.6: All UserID GID Information per user
+--------------------------------------------
+```
+{% for cd in all_user_details.results %}
+{{ cd.stdout }}
+{% endfor %}
+```
+### 2.7: Sudoers Information
+--------------------------------------------
+2.7.1 - All Sudoers
+--------------------------------------------
+```
+{{ sudoers_details.stdout }}
+```
+
+2.7.2 Extra Sudoers Content
+--------------------------------------------
+```
+{{ extra_sudoers_details.stdout }}
+```
+
+### 2.8 Crontab Information
+--------------------------------------------
+
+2.8.1 Root Crontab Information
+--------------------------------------------
+```
+{% if root_crontab_details.stdout != "" %}
+{{ root_crontab_details.stdout }}
+{% elif root_crontab_details.stderr != "" %}
+{{ root_crontab_details.stderr }}
+{% endif %}
+```
+
+2.8.2. User Crontab Information
+-------------------------------------------
+```
+{% for cd in crontab_details.results %}
+{% if cd.stdout != "" %}
+User: {{ cd.item }} - {{ cd.stdout }}
+{% elif cd.stderr != "" %}
+User {{ cd.item }} - {{ cd.stderr }}
+{% endif %}
+{% endfor %}
+```
+
+2.8.3. Cron.allow
+-------------------------------------------
+```
+{{ cron_allow_details.stdout }}
+```
+
+2.8.4. Cron.deny
+-------------------------------------------
+```
+{{ cron_deny_details.stdout }}
+```
+
+2.8.5 Cron.daily Information
+------------------------------
+```
+{% if cron_daily_details.stdout != "" %}
+{{ cron_daily_details.stdout }}
+{% elif cron_daily_details.stderr != "" %}
+{{ cron_daily_details.stderr }}
+{% endif %}
+```
+
+2.8.6 Cron.hourly Information
+------------------------------
+```
+{% if cron_hourly_details.stdout != "" %}
+{{ cron_hourly_details.stdout }}
+{% elif cron_hourly_details.stderr != "" %}
+{{ cron_hourly_details.stderr }}
+{% endif %}
+```
+
+2.8.7 Cron.monthly Information
+-----------------------------
+```
+{% if cron_monthly_details.stdout != "" %}
+{{ cron_monthly_details.stdout }}
+{% elif cron_monthly_details.stderr != "" %}
+{{ cron_monthly_details.stderr }}
+{% endif %}
+```
+
+2.8.8 Cron.weekly Information
+-----------------------------
+```
+{% if cron_weekly_details.stdout != "" %}
+{{ cron_weekly_details.stdout }}
+{% elif cron_weekly_details.stderr != "" %}
+{{ cron_weekly_details.stderr }}
+{% endif %}
+```
+
+### 2.9 Samba Information
+------------------------------------------
+
+2.9.1 Samba Status
+-----------------------------------------
+```
+{{ samba_status.stdout }}
+```
+
+2.9.2. Samba Run Level
+----------------------------------------
+```
+{{ samba_run_level.stdout }}
+```
+
+2.9.3 Samba Configuration File
+----------------------------------------
+```
+{{ samba_config_details.stdout }}
+```
+
+### 2.10 Login Access Control Table File Information
+----------------------------------------------
+```
+{{ login_access_control_table_details.stdout }}
+```
+
+### 2.11 System Variables Configuration File
+-------------------------------------------
+```
+{{ system_ctl_conf_details.stdout }}
+```
+
+## 3. Hardware Information
+=========================
+
+### 3.1 CPU General Information
+--------------------------
+```
+{{ cpu_general_info.stdout }}
+```
+
+### 3.2 CPU Processor Information
+--------------------------
+```
+{{ cpu_processor_info.stdout }}
+```
+
+### 3.3 Memory Information (in MB)
+-------------------------
+```
+{{ memory_info.stdout }}
+```
+
+### 3.4 Sector Size of Partition Information 
+-----------------------------------------
+```
+{{ sector_size_disk_info.stdout }}
+```
+## 4. File System Information
+============================
+
+### 4.1 Fstab Information
+-------------------------
+```
+{{ fstab_info.stdout }}
+```
+
+### 4.2 Mounts Points
+--------------------------
+```
+{{ mounts_points_info.stdout }}
+```
+
+### 4.3 Disk Information
+--------------------------
+```
+{{ disk_info.stdout }}
+```
+
+## 5. Logical Volumes Information
+===============================
+
+### 5.1 Version
+- ---------------
+```
+{{ lvm_version_details.stdout }}
+```
+
+### 5.2 Volume Group Information
+-----------------------------------------
+
+5.2.1 vgs
+----------
+```
+{{ vg_short_details.stdout }}
+```
+
+5.2.2 vgdisplay
+-----------------
+```
+{{ vg_info.stdout }}
+```
+
+### 5.3 Logical Volume Information 
+--------------------------------------------
+
+5.3.1 lvs
+----------
+```
+{{ lv_short_details.stdout }}
+```
+
+5.3.2 lvdisplay
+-----------------
+```
+{{ lv_info.stdout }}
+```
+
+### 5.4 Physical Volumes Information
+-------------------------------------------
+```
+{{ pv_info.stdout }}
+```
+
+### 5.5 Partition Information
+--------------------------------------------
+```
+{{ partition_info.stdout }}
+```
+
+## 6. Network Configuration Information
+===========================================
+
+### 6.1 Interfaces and Configuration File
+------------------------------------------
+```
+{% if ansible_distribution_major_version == "6" %}
+{{ interfaces_config_details_rhel6.stdout }}
+{% elif ansible_distribution_major_version == "7" %}
+{{ interfaces_config_details_rhel7.stdout }}
+{% endif %}
+```
+
+### 6.2 DNS Configuration
+------------------------------------------
+```
+{{ dns_config_details.stdout }}
+```
+
+### 6.3 Routing Information
+-------------------------------------------
+```
+{{ routing_info.stdout }}
+```
+
+### 6.4 Hostfile Information
+------------------------------------------
+```
+{{ host_file_info.stdout }}
+```
+
+### 6.5 IP Forwarding Information
+------------------------------------------
+```
+IP Forwarding Status: {{ ip_forwarding_details.stdout }}
+```
+
+## 7. Security Information
+===========================================
+
+### 7.1 Firewall Rules
+-------------------------------------------
+```
+{% if ansible_distribution_major_version == "6" %}
+{{ firewall_details.stdout }}
+{% elif ansible_distribution_major_version == "7" %}
+
+Firewall Active Zones
+-----------------------------
+{{ firewall_active_zones.stdout }}
+
+Firewall Services Zones
+-----------------------------------
+{{ firewall_services_zones.stdout }}
+
+Firewall Public Zones
+-----------------------------------
+{{ firewall_public_zones.stdout }}
+
+{% endif %}
+```
+### 7.2 Host Allow File
+------------------------------------------
+```
+{{ hosts_allow_details.stdout }}
+```
+
+### 7.3 Host Deny File
+-------------------------------------------
+```
+{{ hosts_deny_details.stdout }}
+```
+
+### 7.4 Login Group Allowed File
+-------------------------------------------
+```
+{% if login_group_allowed_details.stdout != "" %}
+{{ login_group_allowed_details.stdout }}
+{% elif login_group_allowed_details.stderr != "" %}
+{{ login_group_allowed_details.stderr }}
+{% endif %}
+```
+
+### 7.5 Named Switch Configuration file
+-------------------------------------------
+```
+{{ named_switch_config_details.stdout }}
+```
+
+### 7.6 NTP
+-------------------------------------------
+```
+{{ ntp_config_details.stdout }}
+```
+
+### 7.7 SSH Information
+-------------------------------------------
+
+7.7.1 ssh configuration
+------------------------------------------
+```
+{{ ssh_config_details.stdout }}
+```
+
+7.7.2 sshd configuration
+------------------------------------------
+```
+{{ sshd_config_details.stdout }}
+```
+
+### 7.8 SELINUX
+-------------------------------------------
+```
+{{ selinux.stdout }}
+```
+
+## 8. Logging Information
+============================================
+
+### 8.1 Log Rotate Information
+--------------------------------------------
+
+8.1.1 - OS
+--------------------------------------------
+```
+{% if os_logrotate_details.stdout != "" %}
+{{ os_logrotate_details.stdout }}
+{% elif os_logrotate_details.stderr != "" %}
+{{ os_logrotate_details.stderr }}
+{% endif %}
+```
+
+8.1.2 - App
+--------------------------------------------
+```
+{% if app_logrotate_details.stdout != "" %}
+{{ app_logrotate_details.stdout }}
+{% elif app_logrotate_details.stderr != "" %}
+{{ app_logrotate_details.stderr }}
+{% endif %}
+```
+
+### 8.2 Check state of rsyslog
+------------------------------------------
+```
+{% if ansible_distribution_major_version == "6" %}
+{{ rsyslog_state_info_rhel6.stdout }}
+{% elif ansible_distribution_major_version == "7" %}
+{{ rsyslog_state_info_rhel7.stdout }}
+{% endif %}
+```
+
+### 8.3 Remote Logging Configuration
+------------------------------------------
+```
+{{ remote_logging_config.stdout }}
+```
+
+### 8.4 System Logging Configuration
+------------------------------------------
+```
+{{ system_logging_config.stdout }}
+```
+
+## 9. Patching Information
+==========================================
+
+### 9.1 Channels
+------------------------------------------
+```
+{{ all_channels_details.stdout }}
+```
+
+## 10. Monitoring Information
+==========================================
+
+### 10.1 check_mk Information
+------------------------------------------
+```
+{% if ansible_distribution_major_version == "6" %}
+{{ check_mk_details_rhel6.stdout }}
+{% elif ansible_distribution_major_version == "7" %}
+{{ check_mk_details_rhel7.stdout }}
+{% endif %}
+```
+
+### 10.2 xinetd enabled
+------------------------------------------
+```
+{{ xinetd_details.stdout }}
+```
+
+## 11. Software Information
+============================================
+
+### 11.1 All Packages
+--------------------------------------------
+```
+{% for line in all_packages_details.stdout.splitlines() %}
+
+{{ line }}<br>
+
+{% endfor %}
+```
+
+### 11.2 OS Specific Packages Information
+--------------------------------------------
+```
+{{ package_details.stdout }}
+```
+
+## 12. Users Account Information
+============================================
+
+### 12.1 Grouped Users
+--------------------------------------------
+```
+{{ grouped_users.stdout }}
+```
+
+### 12.2. Root User and Group Information
+----------------------------------------------
+```
+{{ root_user_details.stdout }}
+```
+
+### 12.3. User Account Information
+-----------------------------------------------
+```
+{% for cd in user_account_details.results %}
+User: {{ cd.item }}
+------------------
+{{ cd.stdout }}
+{% endfor %}
+```
+
+## 13. KickStart Information
+==========================================
+```
+{{ kickstart.stdout }}
+```

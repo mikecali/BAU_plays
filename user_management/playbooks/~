@@ -1,0 +1,32 @@
+---
+- name: User management
+  hosts: all
+  become: yes
+  vars:
+    user_groups:
+      - { name: astro, system: False, gid: 1200, state: present }
+      - { name: burle, system: False, gid: 1201, state: present }
+
+    user_users:
+      - { name: sup-520505, state: absent, remove: yes }
+      - { name: sup-520549, state: absent, remove: yes }
+     
+      # Extra users to be defined
+      - { name: trixie1, uid: 1200, comment: "trixie la belle", group: "sysadmin", groups: ["astro","burle"], append: yes }
+      - { name: aberforth, uid: 1201, comment: "aberforth huxtable", group: "dbadmin", groups: ["burle","ind01"], append: yes }
+      # - { name: trixie1, uid: 1200, comment: "trixie la belle", group: "sysadmin" }
+  roles:
+    - { role: user }
+
+- name: Solo server user management
+  hosts: development
+  become: yes
+  vars:
+    user_users:
+    - { name: rosie, comment: "rosie the riveter", group: "users", append: yes }
+  roles:
+    - { role: user}
+
+...
+
+    

@@ -1,0 +1,8 @@
+- name: Get the applications/packages installed details
+  shell: chkconfig --list
+  register: package_details
+
+- name: Get the firewall details
+  shell: iptables -L -vn
+  register: firewall_details
+  become: yes

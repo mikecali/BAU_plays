@@ -1,0 +1,6 @@
+# defaults file for user
+---
+user_groups: []
+user_add: []
+user_add_ssh: []
+usingjumphost: True

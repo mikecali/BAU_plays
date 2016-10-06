@@ -1,0 +1,15 @@
+- name: Get the firewall active zones 
+  shell: firewall-cmd --get-active-zones
+  register: firewall_active_zones
+
+- name: Get the firewall services zones 
+  shell: firewall-cmd --get-services
+  register: firewall_services_zones
+
+- name: Get the firewall public zones 
+  shell: firewall-cmd --zone=public --list-all
+  register: firewall_public_zones
+
+- name: Get the applications/packages installed details 
+  shell: systemctl list-unit-files --type=service
+  register: package_details

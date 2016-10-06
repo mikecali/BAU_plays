@@ -1,0 +1,32 @@
+- name: Get host allow file 
+  shell: cat /etc/hosts.allow
+  register: hosts_allow_details
+
+- name: Get hosts deny file 
+  shell: cat /etc/hosts.deny
+  register: hosts_deny_details
+
+- name: Get /etc/login.group.allowed details if exist
+  shell: cat /etc/login.group.allowed
+  register: login_group_allowed_details
+  ignore_errors: true
+
+- name: Get Named Service Switch Config file 
+  shell: cat /etc/nsswitch.conf 
+  register: named_switch_config_details
+
+- name: Get NTP configuration 
+  shell: cat /etc/ntp.conf
+  register: ntp_config_details
+
+- name: Get ssh configuration 
+  shell: cat /etc/ssh/ssh_config
+  register: ssh_config_details
+
+- name: Get sshd configuration 
+  shell: cat /etc/ssh/sshd_config
+  register: sshd_config_details
+
+- name: Get selinux details
+  shell: sestatus
+  register: selinux

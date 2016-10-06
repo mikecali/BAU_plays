@@ -1,0 +1,13 @@
+---
+- name: Sudo management
+  hosts: localhost
+  become: yes
+
+  pre_tasks:
+    - include_vars: ../../vars/at_job_sudo_vars.yml
+
+  roles:
+    - { role: at_job_sudo }
+...
+
+    

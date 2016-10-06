@@ -1,0 +1,399 @@
+# SERVER INFORMATION
+* Client - {{ client_name }}
+* Hostname - {{ hostname.stdout }}
+* Project Name: {{ project_name }}
+* Playbook: {{ playbook_name }}
+
+
+# TABLE OF CONTENTS
+===================================================================================
+1. Alert Monitoring  agent Information
+   1.1 List of installed Monitoring Packages
+   1.2 List of running Monitoring agent
+   1.3 Monitoring agent startup config 
+2. Backup agent Infomration
+   2.1 List of installed Backup agent Packages
+   2.2 List of running Backup agent
+   2.3 Backup agent startup config
+3. Patching
+   3.1  Server registered on the Satellite server
+4. Daily Checks
+   4.1 Root alias has been setup
+5. Security
+   5.1 Unix Support User Accounts
+   5.2 Project User account
+   5.3 SSH Config check
+   5.4 Root authorized_keys key check
+   5.5 SELinux check
+   5.6 Local Firewall rules
+6. Miscellaneous
+   6.1 List of installed Miscellaneous Packages
+   6.2 List of running Miscellaneous agent
+   6.3 Miscellaneous agent startup config 
+   6.4 DNS resolution check
+   
+=============================================
+## 1. Alert Monitoring agent Information
+---------------------------------------------
+### 1.1 List of installed Monitoring Packages
+---------------------------------------------
+{% for monpkg1 in monitoring_pkg.results %}
+{% if "not installed" not in  monpkg1.stdout  %}
+ - OK: Monitoring package: {{ monpkg1.item }} - {{ monpkg1.stdout }}
+{% else %}
+- Error: Monitoring package: {{ monpkg1.item }} - not installed !!!
+{% endif %}
+{% endfor %}
+---------------------------------------------
+### 1.2 List of running Monitoring agent
+---------------------------------------------
+{% for monpkg2 in monitoring_status.results %}
+{% if "running" in monpkg2.stdout %}
+- OK: Monitoring agent: {{ monpkg2.item }} -  {{ monpkg2.stdout }}
+{% elif "stopped"  in monpkg2.stdout %}
+- Error: {{ monpkg2.item }} - monitoring agent is stopped !!!
+{% else %}
+- Error: {{ monpkg2.item }} - monitoring agent not installed !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+### 1.3 Monitoring agent startup config 
+--------------------------------------------
+{% for monpkg3 in monitoring_starts.results %}
+{% if "on"  in  monpkg3.stdout  %}
+- OK: Monitoring agent {{ monpkg3.item }} - {{ monpkg3.stdout }}
+{% else %}
+- Error: Monitoring: {{ monpkg3.item }} - {{ monpkg3.stdout }} !!!
+{% endif %}
+{% endfor %}
+=============================================
+## 2. Backup agent Information
+---------------------------------------------
+### 2.1 List of installed Backup agent Packages
+---------------------------------------------
+{% for backupkg1 in backup_pkg.results %}
+{% if "not installed" not in  backupkg1.stdout  %}
+- OK: Backup package: {{ backupkg1.item }} - {{ backupkg1.stdout }}
+{% else %}
+- Error: {{ backupkg1.item }} - package not installed !!!
+{% endif %}
+{% endfor %}
+---------------------------------------------
+### 2.2 List of running Backup agent
+---------------------------------------------
+{% for backupkg2 in backup_status.results %}
+{% if backupkg2.stdout != "" %}
+- OK: Backup agent: {{ backupkg2.item }} -  {{ backupkg2.stdout }}
+{% else %}
+- Error: {{ backupkg2.item }} - agent  not running !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+### 2.3 Backup agent startup config
+--------------------------------------------
+{% for backupkg3 in backup_starts.results %}
+{% if "on"  in  backupkg3.stdout  %}
+- OK: Monitoring agent {{ backupkg3.item }} - {{ backupkg3.stdout }}
+{% else %}
+- Error: Monitoring: {{ backupkg3.item }} - {{ backupkg3.stdout }} !!!
+{% endif %}
+{% endfor %}
+=============================================
+## 3. Patching
+---------------------------------------------
+### 3.1  Server registered on the Satellite server
+-------------------------------------------
+{% if "Error" not in patching_repo.stdout %}
+- OK: {{ patching_repo.stdout }}
+{% else %}
+- Error: {{ patching_repo.stdout }}
+{% endif %}
+=============================================
+## 4. Daily Checks
+---------------------------------------------
+### 4.1 Root alias has been setup
+-------------------------------------------
+Check if aliases file exist /etc/aliases
+{% if "No such file" not in aliases_file.stdout %}
+- OK: File exist: {{ aliases_file.stdout }}
+{% else %}
+- Error: {{ aliases_file.stdout }}
+{% endif %}
+Root Aliases 
+{% if root_alias.stdout != "" %}
+- OK: root alias: {{ root_alias.stdout }}
+{% else %}
+- Error: root alias: {{ root_alias.stdout }}
+{% endif %}
+=============================================	
+## 5. Security
+---------------------------------------------
+### 5.1 Unix Support User Accounts
+-------------------------------------------
+Unix users:
+{% for user1 in unix_support_user.results %}
+{% if user1.stdout != "" %}
+- OK: User exist: {{ user1.item }} - {{ user1.stdout }}
+{#%set  success = success + 1 %#}
+{% else %}
+- Error: User doesn't exist: {{ user1.item }} - {{ user1.stdout }} - should be created !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+### 5.2 Project Support User Accounts
+-------------------------------------------
+Project users:
+{% for user2 in unix_proj_user.results %}
+{% if user2.stdout == "" %}
+- OK: User: {{ user2.item }} - no longer exist
+{% else %}
+- Error: User: {{ user2.item }} - {{ user2.stdout }} - user should be removed !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+### 5.3 SSH Config check
+-------------------------------------------
+{% for sshlist1 in ssh_list.results %}
+{% if "PermitRootLogin yes"  not in  sshlist1.stdout %}
+- OK: SSH Config -  {{ sshlist1.stdout }}
+{% else %}
+- Error: SSH Config - {{ sshlist1.stdout }}
+{% endif %}
+{% endfor %}
+-------------------------------------------
+### 5.4 Root authorized_keys key check
+-------------------------------------------
+{% for sshlist2 in root_key.results %}
+{% if "cannot open"   in  sshlist2.stdout %}
+- OK: root authorized key check -  {{ sshlist2.stdout }}
+{% elif "empty" in sshlist2.stdout %}
+- OK: root authorized key check -  {{ sshlist2.stdout }}
+{% else %}
+- Error: root authorized_keys exist {{ sshlist2.stdout }} !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+### 5.5 SELinux check
+-------------------------------------------
+{% if "Enforcing"   in  selinux.stdout %}
+- OK: SELinux -  {{ selinux.stdout }}
+{% else %}
+- Error: SELinux {{ selinux.stdout }} !!!
+{% endif %}
+-------------------------------------------
+### 5.6 Local Firewall rules
+-------------------------------------------
+{% if 'Chain INPUT (policy ACCEPT)'  in  iptables.stdout %}
+- Error: IPTables {{ iptables.stdout }} !!!
+{% else %}
+- OK: IPTables -  {{ iptables.stdout }}
+{% endif %}
+=============================================
+## 6. Miscellaneous Information
+---------------------------------------------
+### 6.1 List of installed Miscellaneous Packages
+---------------------------------------------
+{% for miscpkg1 in misc_pkg.results %}
+{% if "not installed" not in  miscpkg1.stdout  %}
+ - OK: Miscellaneous package: {{ miscpkg1.item }} - {{ miscpkg1.stdout }}
+{% else %}
+- Error: Miscellanous package: {{ miscpkg1.item }} - not installed !!!
+{% endif %}
+{% endfor %}
+---------------------------------------------
+### 6.2 List of running Miscellaneous agent
+---------------------------------------------
+{% for miscpkg2 in misc_status.results %}
+{% if "running" in miscpkg2.stdout %}
+- OK: Miscellaneous agent: {{ miscpkg2.item }} -  {{ miscpkg2.stdout }}
+{% elif "stopped"  in miscpkg2.stdout %}
+- Error: {{ miscpkg2.item }} - miscellaneous agent is stopped !!!
+{% else %}
+- Error: {{ miscpkg2.item }} - miscellanous agent not installed !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+### 6.3 Miscellaneous agent startup config 
+--------------------------------------------
+{% for miscpkg3 in misc_starts.results %}
+{% if "on"  in  miscpkg3.stdout  %}
+- OK: Miscellaneous agent {{ miscpkg3.item }} - {{ miscpkg3.stdout }}
+{% else %}
+- Error: Miscellaneous: {{ miscpkg3.item }} - {{ miscpkg3.stdout }} !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+### 6.4 DNS resolution check
+--------------------------------------------
+{% for miscpkg4 in misc_dnss.results %}
+{% if "server can't find" not in miscpkg4.stdout != "" %}
+- OK: DNS resolution check - {{ miscpkg4.item }} - {{ miscpkg4.stdout }}
+{% else %}
+- Error: DNS resolution check: {{ miscpkg4.item }} - {{ miscpkg4.stdout }} !!!
+{% endif %}
+{% endfor %}
+------------------------------------------------------------------------------------
+
+####################################################################################
+
+------------------------------------------------------------------------------------
+* * *    Error Report Summary         * * * 
+-------------------------------------------
+* 1. Alert Monitoring agent Information
+-------------------------------------------
+** 1.1 Monitoring package not installed
+-------------------------------------------
+{% for monpkg in monitoring_pkg.results %}
+{% if "not installed" in  monpkg.stdout  %}
+- Error: Monitoring: {{ monpkg.item }} - {{ monpkg.stdout }} !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+** 1.2 Status of monitoring agent
+--------------------------------------------
+{% for monpkg2 in monitoring_status.results %}
+{% if monpkg2.stdout != ""%}
+{% else %}
+- Error: Monitoring agent: {{ monpkg2.item }} - not running !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+** 1.3 Monitoring agent startup config 
+--------------------------------------------
+{% for monpkg3 in monitoring_starts.results %}
+{% if "on" not in  monpkg3.stdout  %}
+- Error: Monitoring: {{ monpkg3.item }} - {{ monpkg3.stdout }} !!!
+{% endif %}
+{% endfor %}
+--------------------------------------------
+* 2. Backup agent Information
+-------------------------------------------
+** 2.1 Backup package not installed
+-------------------------------------------
+{% for backupkg in backup_pkg.results %}
+{% if "not installed" in  backupkg.stdout  %}
+- Error: Backup: {{ backupkg.item }} - {{ backupkg.stdout }} !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+** 2.2 Backup agent not found in the process list
+--------------------------------------------
+{% for backupkg2 in backup_status.results %}
+{% if backupkg2.stdout != ""%}
+{% else %}
+- Error: Backup agent: {{ backupkg2.item }} - not running !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+** 2.3  Backup agent startup config
+--------------------------------------------
+{% for backupkg3 in backup_starts.results %}
+{% if "on" not in  backupkg3.stdout  %}
+- Error: Backup: {{ backupkg3.item }} - {{ backupkg3.stdout }} !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+* 3. Patching
+-------------------------------------------
+** 3.1  Server registered on the Satellite server
+-------------------------------------------
+{% if "Error" in patching_repo.stdout %}
+- Error: {{ patching_repo.stdout }}
+{% endif %}
+
+-------------------------------------------
+* 4. Daily Checks
+-------------------------------------------
+{% if "No such file" in aliases_file.stdout %}
+Aliases file
+- Error: {{ aliases_file.stdout }}
+{% endif %}
+{% if root_alias.stdout == "" %}
+Root Aliases 
+- Error: root alias not set !!!
+
+{% endif %}
+-------------------------------------------
+* 5. Security
+-------------------------------------------
+* 5.1.Unix Support User Accounts
+{% for user1 in unix_support_user.results %}
+{% if user1.stdout == "" %}
+- Error: User - {{ user1.item }} doesn't exist should be created!!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+* 5.2 Unix Project User Accounts
+-------------------------------------------
+{% for user2 in unix_proj_user.results %}
+{% if user2.stdout != "" %}
+- Error: User: {{ user2.item }} - {{ user2.stdout }} exist should be remove !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+* 5.3 SSH Config check
+-------------------------------------------
+{% for sshlist1 in ssh_list.results %}
+{% if "PermitRootLogin yes"   in  sshlist1.stdout %}
+- Error: SSH Config -  {{ sshlist1.stdout }}
+{% endif %}
+{% endfor %}
+-------------------------------------------
+* 5.4 Root authorized_keys key check
+-------------------------------------------
+{% for sshlist2 in root_key.results %}
+{% if "cannot open"   not in  sshlist2.stdout %}
+- Error: root authorized key exist -  {{ sshlist2.stdout }}
+{% endif %}
+{% endfor %}
+-------------------------------------------
+* 5.5 SELinux check
+-------------------------------------------
+{% if "Enforcing"  not in  selinux.stdout %}
+- Error: SELinux {{ selinux.stdout }} !!!
+{% endif %}
+-------------------------------------------
+* 5.6 Local Firewall rules
+-------------------------------------------
+{% if 'Chain INPUT (policy ACCEPT)'  in  iptables.stdout %}
+- Error: IPTables {{ iptables.stdout }} !!!
+{% endif %}
+-------------------------------------------
+* 6. Miscellaneous Information
+--------------------------------------------
+** 6.1 System Daemons
+-------------------------------------------
+** 6.1 List of installed Miscellaneous Packages
+-------------------------------------------
+{% for miscpkg in misc_pkg.results %}
+{% if "not installed" in  miscpkg.stdout  %}
+- Error: Miscellaneous: {{ miscpkg.item }} - {{ miscpkg.stdout }} !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+** 6.2 List of running Miscellaneous agent
+--------------------------------------------
+{% for miscpkg2 in misc_status.results %}
+{% if miscpkg2.stdout != ""%}
+{% else %}
+- Error: Miscellaneous agent: {{ miscpkg2.item }} - not running !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+** 6.3 Miscellaneous agent startup config 
+--------------------------------------------
+{% for miscpkg3 in misc_starts.results %}
+{% if "on" not in  miscpkg3.stdout  %}
+- Error: Miscellaneous: {{ miscpkg3.item }} - {{ miscpkg3.stdout }} !!!
+{% endif %}
+{% endfor %}
+-------------------------------------------
+### 6.4 DNS resolution check
+--------------------------------------------
+{% for miscpkg4 in misc_dnss.results %}
+{% if "server can't find" in miscpkg4.stdout == ""  %}
+- Error: DNS resolution check: {{ miscpkg4.item }} - {{ miscpkg4.stdout }} !!!
+{% endif %}
+{% endfor %}
+--------------------------------------------
+=============================================

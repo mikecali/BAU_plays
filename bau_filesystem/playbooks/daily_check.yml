@@ -1,0 +1,25 @@
+
+---
+# DAILY CHECK
+
+- hosts: all
+  gather_facts: False
+
+  tasks:
+
+  - name: Check uptime
+    shell: "uptime"
+    register: uptime
+
+  - name: Uptime output
+    debug: msg={{ uptime.stdout_lines }}
+
+  - name: Check logs
+    shell: grep "`date --date="today" +%b\ %e`" /var/log/messages* | egrep 'kern|warn|fail|err'
+    sudo: yes
+    sudo_user: root
+    register: logs
+
+  - name: Logs output
+    debug: var=logs.stdout_lines
+

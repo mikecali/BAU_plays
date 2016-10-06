@@ -1,0 +1,12 @@
+[jmt01]
+jmt01 ansible_ssh_host=172.17.203.21
+
+[erp-prd-local]
+csuxprdbs210
+csuxprdbs154
+csuxprdbs155
+
+[erp-npe-local]
+csuxnddbs037
+csuxnpdbs094
+csuxnfdbs043

@@ -1,0 +1,11 @@
+---
+- name: Change channel subscription
+  become: yes
+  rhn_subscribtion:
+   satellite_url: "https://rhsatellite.ds.acc.co.nz/rpc/api"
+   user_name: "{{ user_name }}@ds"
+   password: "{{ password }}"
+   hostname: "{{ item }}"
+   channel: "{{channel}}"
+  with_items: play_hosts
+  delegate_to: localhost

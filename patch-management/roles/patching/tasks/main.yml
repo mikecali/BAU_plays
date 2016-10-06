@@ -1,0 +1,6 @@
+- include: satelitte-snapshot.yml
+- include: set-notifications.yml
+- include: vm-snapshot.yml
+- include: change-channel.yml
+- include: upgrade-hosts.yml
+

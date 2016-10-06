@@ -1,0 +1,12 @@
+---
+
+ - name: Copy BAU handover check report
+   become: true
+   become_user: root
+   fetch: 
+      src: "/tmp/{{ client_name }}-{{ hostname.stdout }}.md"
+      dest: "/home/ariely/prd-bau-handover/udm-roles/bau-hand-over/roles/bau/reports/{{ client_name }}-{{ hostname.stdout }}.md"
+      fail_on_missing: yes
+      flat: yes
+   tags:
+     - report

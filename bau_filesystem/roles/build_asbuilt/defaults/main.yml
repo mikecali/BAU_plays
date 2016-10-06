@@ -1,0 +1,11 @@
+---
+# defaults file for build_asbuilt
+project_name: chorus-infra
+gitlab_url: https://git.env.care/datacom-dao/dao-infra
+playbook_name: playbooks/build_asbuilt.yml
+client_name: Chorus
+git_repo_location: ../../inventory/as-built/
+playbook_create_vm: []
+playbook_build_os: []
+playbook_hardening: []
+playbook_asbuilt: []

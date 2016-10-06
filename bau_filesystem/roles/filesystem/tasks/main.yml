@@ -1,0 +1,16 @@
+---
+# main tasks file for filesystem
+- include: disks.yml tags=disks
+  when: disk_new == True or disk_increase == True
+
+- include: vg_create.yml tags=vg_create
+  when: vg_create == True
+
+- include: vg_extend.yml tags=vg_extend
+  when: vg_extend == True
+
+- include: filesystem_new.yml tags=filesystem_new
+  when: filesystem_new == True
+
+- include: filesystem_increase.yml tags=filesystem_increase
+  when: filesystem_increase == True

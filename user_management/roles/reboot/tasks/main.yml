@@ -1,0 +1,134 @@
+---
+# tasks file for reboot
+- hosts: all
+  serial: 1
+  tasks:
+
+  - name: CHECK if etc backup file exist
+    become: yes
+    become_user: root
+    shell: "ls /dnz_support/pre-patch-bkp | grep `date +%Y-%m-%d` | grep etc"
+    register: etc_backup
+    ignore_errors: yes
+
+  - name: Pre-reboot backup of /etc
+    shell: "mkdir /dnz_support/pre-patch-bkp; tar -czf /dnz_support/pre-patch-bkp/etc.`date +%Y-%m-%d`.tgz /etc"
+    become: yes
+    become_user: root
+    register: backup_etc_output
+    when: etc_backup.stdout == ""
+    ignore_errors: yes
+
+  - name: COPY config_check.sh script
+    copy: src=config_check.sh dest=/dnz_support/config_check.sh owner=root mode=0755
+    become: yes
+    become_user: root
+    register: config_check_copy
+    ignore_errors: yes
+    tags: reboot_only
+
+  - name: Check if pre_reboot file exist
+    become: yes
+    become_user: root
+    shell: "ls /dnz_support/pre-patch-bkp | grep `date +%Y-%m-%d` | grep pre_reboot"
+    register: pre_reboot_check
+    ignore_errors: yes
+    tags: pre_reboot_check
+    tags: reboot_only
+
+  - name: Pre-reboot run config_check.sh
+    shell: "/dnz_support/config_check.sh > /dnz_support/pre-patch-bkp/pre_reboot.`date +%Y-%m-%d`.txt"
+    become: yes
+    become_user: root
+    register: config_check_pre_reboot
+    when: pre_reboot_check.stdout == ""
+    ignore_errors: yes
+    tags: reboot_only
+
+  - name: PROMPT Pre-reboot
+    pause: prompt="This will reboot the server (pre-patch). Do you want to proceed? Press (Enter) to continue or Press (ctrl+C) to Abort"
+
+  - name: Pre-patch Restart Machine
+    shell: /sbin/shutdown -r now "OS patching triggered, reboot initiated"
+    async: 1
+    poll: 0
+    ignore_errors: true
+
+#  - name: REBOOT Wait time for rebooting hosts
+#    pause: seconds=180
+
+  - name: REBOOT Wait for hosts to come back
+    local_action: wait_for host={{ inventory_hostname }}
+                  port=22
+                  state=started
+                  delay=100
+                  timeout=3600
+    become: false
+
+#  - name: PROMPT Reboot completed
+#    pause: prompt="Server/s has been rebooted. Please ask APP/DB people to check. Press (Enter) to continue or Press (ctrl+C) to Abort"
+
+  - name: Check if post_reboot file exist
+    become: yes
+    become_user: root
+    shell: "ls /dnz_support/pre-patch-bkp | grep `date +%Y-%m-%d` | grep post_reboot"
+    register: post_reboot_check
+    ignore_errors: yes
+    tags: post_reboot_check
+    tags: reboot_only
+
+  - name: Post-patch run config_check.sh
+    shell: "/dnz_support/config_check.sh > /dnz_support/pre-patch-bkp/post_reboot.`date +%Y-%m-%d`.txt"
+    become: yes
+    become_user: root
+    register: config_check_post_reboot
+    ignore_errors: yes
+    #when: post_reboot_check.stdout == ""
+    tags: reboot_only
+
+  - name: Capture pre_reboot filename for diff
+    become: yes
+    become_user: root
+    shell: "ls /dnz_support/pre-patch-bkp | grep `date +%Y-%m-%d` | grep pre_reboot"
+    register: pre_reboot_check_2
+    ignore_errors: yes
+    tags: pre_reboot_check_2
+    tags: reboot_only
+
+  - name: Capture post_reboot filename for diff
+    become: yes
+    become_user: root
+    shell: "ls /dnz_support/pre-patch-bkp | grep `date +%Y-%m-%d` | grep post_reboot"
+    register: post_reboot_check_2
+    ignore_errors: yes
+    tags: post_reboot_check_2
+    tags: reboot_only
+
+  - name: CHECK if config_check.sh exist
+    become: yes
+    become_user: root
+    stat: path=/dnz_support/config_check.sh
+    register: config_check_stat
+    tags: reboot_only
+
+  - name: DELETE config_check.sh script
+    become: yes
+    become_user: root
+    file: path=/dnz_support/config_check.sh state=absent
+    when: config_check_stat.stat.exists == True
+    tags: reboot_only
+
+  - name: DIFF
+    shell: "diff /dnz_support/pre-patch-bkp/{{ pre_reboot_check_2.stdout }} /dnz_support/pre-patch-bkp/{{ post_reboot_check_2.stdout }}"
+    become: yes
+    become_user: root
+    register: diff
+    ignore_errors: yes
+    tags: diff
+    tags: reboot_only
+
+  - name: Output POST-PATCH DIFF
+    debug: msg={{ diff.stdout_lines }}
+    tags: diff_output
+    tags: reboot_only
+

@@ -1,0 +1,25 @@
+---
+ - name: Config Genie package installed
+   shell: rpm -q "{{ item }}" 
+   register: dailychk_pkg
+   ignore_errors: True
+   with_items: "{{ dailychk_pkgs }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - monitoring
+
+ - name: Check file aliases
+   shell: file /etc/aliases
+   register: aliases_file
+   ignore_errors: True
+   when: ansible_os_family == "RedHat"
+   tags:
+     - dailychecks
+ 
+ - name: Check root aliases
+   shell: grep ^root /etc/aliases
+   register: root_alias
+   ignore_errors: True
+   when: ansible_os_family == "RedHat"
+   tags:
+     - dailychecks

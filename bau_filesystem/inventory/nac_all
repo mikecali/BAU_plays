@@ -1,0 +1,9 @@
+[nac_all:children]
+nac_prd
+nac_npe
+
+[nac_prd]
+CSUXPRAPP363 #NA-C App Server 1 (PRD)
+
+[nac_npe]
+CSUXNPAPP364 #NA-C App Server 1 (NPE)

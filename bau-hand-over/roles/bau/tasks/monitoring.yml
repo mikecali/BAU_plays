@@ -1,0 +1,27 @@
+---
+ - name: Check Monitoring package installed
+   shell: rpm -q "{{ item }}" 
+   register: monitoring_pkg
+   ignore_errors: True
+   with_items: "{{ monitoring_pkgs }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - monitoring
+
+ - name: Check running Monitoring agent
+   shell: service "{{ item }}" status
+   register: monitoring_status
+   ignore_errors: True
+   with_items: "{{ monitoring_stat }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - monitoring
+
+ - name: Monitoring daemon startup config
+   shell: chkconfig --list | grep "{{ item }}" | awk '{ print $5 }'
+   register: monitoring_starts
+   ignore_errors: True
+   with_items: "{{ monitoring_start }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - monitoring

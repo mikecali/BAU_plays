@@ -1,0 +1,11 @@
+---
+- name: YUM package install
+  hosts: prd
+  become: yes
+
+  roles:
+    - { role: yum_package }
+
+...
+
+    

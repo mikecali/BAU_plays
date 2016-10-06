@@ -1,0 +1,31 @@
+#
+# Global variables
+#
+#   True if using a jumphost
+    usingjumphost: false
+#
+#   User Groups - ensure these are added first
+#   
+    user_groups:
+      - { name: astro, system: False, gid: 1200, state: present }
+      - { name: burle, system: False, gid: 1201, state: present }
+#
+#   Users to be removed - all users to be deleyed should be added to this group
+#       and removed from the other groups
+    user_remove:
+      - { name: sup-520505, state: absent, remove: yes }
+      - { name: sup-520549, state: absent, remove: yes }
+#
+#   User Add - for adding Non-SSH Users
+    user_add:
+      # Extra users to be defined
+      - { name: aberforth, uid: 1201, comment: "aberforth huxtable", group: "dbadmin", groups: ["burle","ind01"], append: yes }
+      - { name: rosie, comment: "rosie the riveter", group: "users", append: yes}
+#
+#   User Add SSH - for adding SSH users, as other actions need to be performed
+#   
+    user_add_ssh:
+      # Extra users to be defined
+      - { name: trixie1, uid: 1200, comment: "trixie la belle", group: "sysadmin", groups: ["astro","burle"], password: "{{ 'Blanker9!' | password_hash('sha512') }}" , update_password: on_create, append: yes, generate_ssh_key: yes, ssh_key_type: rsa, ssh_key_bits: 2048, ssh_key_file: .ssh/id_rsa }
+      - { name: baxter5, uid: 1204, comment: "baxter morgan", group: "sysadmin", password: "{{ 'Blanker9!' | password_hash('sha512') }}" , update_password: on_create, append: yes, generate_ssh_key: yes, ssh_key_type: rsa, ssh_key_bits: 2048, ssh_key_file: .ssh/id_rsa }
+      

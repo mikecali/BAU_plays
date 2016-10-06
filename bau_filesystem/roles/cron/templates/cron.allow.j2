@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+
+{% for login in cron_users_allowed %}
+{{ login }}
+{% endfor %}

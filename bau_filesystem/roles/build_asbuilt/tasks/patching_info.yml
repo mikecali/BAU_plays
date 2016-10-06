@@ -1,0 +1,3 @@
+- name: Get all channels
+  shell: yum repolist
+  register: all_channels_details

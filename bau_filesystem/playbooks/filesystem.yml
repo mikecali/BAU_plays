@@ -1,0 +1,12 @@
+---
+# Filesystem and disk management
+- name: Filesystem and disk management
+  hosts: all
+  become: yes
+
+  pre_tasks:
+    - include_vars: ../../vars/filesystem_vars.yml
+
+  roles:
+    - { role: filesystem }
+...

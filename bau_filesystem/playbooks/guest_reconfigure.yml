@@ -1,0 +1,40 @@
+# http://docs.ansible.com/ansible/vsphere_guest_module.html
+---
+- name: Reconfigure VMware guests
+  hosts: localhost
+  connection: local
+  gather_facts: False
+
+#  vars:
+#    instance_set: cfi-sit
+    # instance_set: cfi-sit
+    # instance_set: cfi-preprod
+    # instance_set: cfi-prod
+
+  pre_tasks:
+    - include_vars: ../../secrets/alabs-vsphere.yml
+    #- include_vars: ../../vars/global-constants.yml
+    - include_vars: ../../vars/vm_resources.yml
+    #- include_vars: ../../vars/{{instance_set}}-instances.yml
+
+  tasks:
+
+  - name: Reconfigure guest
+    vcenter:
+      vcenter_hostname: "{{vcenter_hostname}}"
+      username: "{{vcenter_username}}"
+      password: "{{vcenter_password}}"
+      action: reconfigure
+      vm_name: "{{ item.name|upper }}"
+      template: "{{ item.template }}"
+      customize_guest: False # Defaults to False
+      datacenter_name: "{{ esxi_datacenter }}"
+      cluster_name: "{{ item.cluster }}"
+      vm_disk: "{{ item.vm_disk }}"
+      datastores: 
+        - "{{item.datastore}}"
+      num_cpus: "{{ item.vm_hardware.num_cpus }}"
+      memory_mb: "{{ item.vm_hardware.memory_mb }}"
+      domain_name: "{{ domain_name }}"
+      os_family: linux
+    with_items: instances

@@ -1,0 +1,13 @@
+[netcool_prod:children]
+netcool_pri
+netcool_sec
+
+[netcool_pri]
+CSUXPRAPP227 #Netcool Collection Server (Primary)
+CSUXPRAPP228 #Netcool Probe 1 (Primary)
+CSUXPRAPP229 #Netcool Probe 2 (Primary)
+
+[netcool_sec]
+CSUXPRAPP230 #Netcool Collection Server (Secondary)
+CSUXPRAPP231 #Netcool Probe 1 (Secondary)
+CSUXPRAPP232 #Netcool Probe 2 (Secondary)

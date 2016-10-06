@@ -1,0 +1,27 @@
+- name: Get the logrotate OS details of each user
+  shell: cat /etc/logrotate.conf
+  register: os_logrotate_details
+  ignore_errors: true
+
+- name: Get the logrotate app details of each user
+  shell: cat /etc/logrotate.d/*
+  register: app_logrotate_details
+  ignore_errors: true
+
+- name: Check state of rsyslog 
+  shell: chkconfig --list rsyslog
+  register: rsyslog_state_info_rhel6
+  when: ansible_distribution_major_version == "6"
+
+- name: Check state of rsyslog 
+  shell: systemctl status rsyslog.service
+  register: rsyslog_state_info_rhel7
+  when: ansible_distribution_major_version == "7"
+
+- name: Get remote system logging configuration 
+  shell: cat /etc/rsyslog.conf
+  register: remote_logging_config
+
+- name: Get system logging configuration
+  shell: cat /etc/logrotate.d/syslog
+  register: system_logging_config

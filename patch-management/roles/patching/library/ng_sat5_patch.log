@@ -1,0 +1,22 @@
+2016-05-12 16:12:08,389 - ng_sat5_patch - INFO - Checking status of host(s).. ['kdctestguest99'] 
+2016-05-12 16:12:08,425 - ng_sat5_patch - DEBUG - Sending CMK message ['GET services\nColumns: host_name description state\nFilter: host_name ~ kdctestguest99\nFilter: state >= 2\n']
+2016-05-12 16:12:08,426 - ng_sat5_patch - INFO - reading livestatus results
+2016-05-12 16:12:12,591 - ng_sat5_patch - DEBUG - live status message:kdctestguest99;Check Password Age root;2
+kdctestguest99;check_unix_ntpd;2
+
+2016-05-12 16:12:12,592 - ng_sat5_patch - INFO - Disabling notifications for host(s): ['kdctestguest99']
+2016-05-12 16:12:12,592 - ng_sat5_patch - DEBUG - CMK set downtime message: ['COMMAND [1463026332] SCHEDULE_HOST_DOWNTIME;kdctestguest99;1463026332;1463055132;1;0;28800;automation;testing\n', 'COMMAND [1463026332] SCHEDULE_HOST_SVC_DOWNTIME;kdctestguest99;1463026332;1463055132;1;0;28800;automation;testing\n']
+2016-05-12 16:12:12,604 - ng_sat5_patch - DEBUG - Sending CMK message ['COMMAND [1463026332] SCHEDULE_HOST_DOWNTIME;kdctestguest99;1463026332;1463055132;1;0;28800;automation;testing\n', 'COMMAND [1463026332] SCHEDULE_HOST_SVC_DOWNTIME;kdctestguest99;1463026332;1463055132;1;0;28800;automation;testing\n']
+2016-05-12 16:12:12,604 - ng_sat5_patch - INFO - reading livestatus results
+2016-05-12 16:12:16,627 - ng_sat5_patch - DEBUG - empty message returned from livestatus
+2016-05-12 16:12:40,094 - ng_sat5_patch - INFO - Checking status of host(s).. ['kdctestguest99'] 
+2016-05-12 16:12:40,107 - ng_sat5_patch - DEBUG - Sending CMK message ['GET services\nColumns: host_name description state\nFilter: host_name ~ kdctestguest99\nFilter: state >= 2\n']
+2016-05-12 16:12:40,107 - ng_sat5_patch - INFO - reading livestatus results
+2016-05-12 16:12:42,147 - ng_sat5_patch - DEBUG - live status message:kdctestguest99;Check Password Age root;2
+kdctestguest99;check_unix_ntpd;2
+
+2016-05-12 16:12:42,148 - ng_sat5_patch - INFO - Enabling notifications for host(s):['kdctestguest99']
+2016-05-12 16:12:42,148 - ng_sat5_patch - DEBUG - CMK remove downtime message: ['COMMAND [1463026362] DEL_DOWNTIME_BY_HOST_NAME;kdctestguest99\n']
+2016-05-12 16:12:42,159 - ng_sat5_patch - DEBUG - Sending CMK message ['COMMAND [1463026362] DEL_DOWNTIME_BY_HOST_NAME;kdctestguest99\n']
+2016-05-12 16:12:42,160 - ng_sat5_patch - INFO - reading livestatus results
+2016-05-12 16:12:46,180 - ng_sat5_patch - DEBUG - empty message returned from livestatus

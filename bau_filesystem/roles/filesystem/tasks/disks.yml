@@ -1,0 +1,59 @@
+---
+# disks tasks file for filesystem
+## This task can scan for new disks and increase existing disks
+
+- block:
+  - name: List lsblk1 - before
+    shell: lsblk
+    register: lsblk1
+    when: disk_new == True or disk_increase == True
+
+  - name: lsblk1 output - before
+    debug: msg={{ lsblk1.stdout_lines }}
+    ignore_errors: yes
+    when: disk_new == True or disk_increase == True
+    
+## New disk presented
+  - name: Count scsi hosts
+    shell: ls /sys/class/scsi_host
+    register: scsi_host_count
+    when: disk_new == True
+    
+  - name: scsi_host_count output
+    debug: var=item
+    with_items: scsi_host_count.stdout_lines
+    when: disk_new == True
+    
+  - name: Rescan for disks
+    shell: /bin/echo "- - -" > /sys/class/scsi_host/{{ item }}/scan
+    with_items: scsi_host_count.stdout_lines
+    when: disk_new == True
+##
+
+## Increase existing disk
+  - name: Count scsi hosts
+    shell: ls /sys/class/scsi_disk
+    register: scsi_disk
+    when: disk_increase == True
+    
+  - name: scsi_disk output
+    debug: var=item
+    with_items: scsi_disk.stdout_lines
+    when: disk_increase == True
+
+  - name: Rescan for disks
+    shell: "echo '1' > /sys/class/scsi_disk/{{ item }}/device/rescan"
+    with_items: scsi_disk.stdout_lines
+    when: disk_increase == True
+##
+
+  - name: List lsblk2 - after
+    shell: lsblk
+    register: lsblk2
+    when: disk_new == True or disk_increase == True
+
+  - name: lsblk2 output - after
+    debug: msg={{ lsblk2.stdout_lines }}
+    ignore_errors: yes
+    when: disk_new == True or disk_increase == True
+

@@ -1,0 +1,13 @@
+- name: Get check_mk details 
+  shell: cat /etc/xinetd.d/check_mk
+  register: check_mk_details_rhel6
+  when: ansible_distribution_major_version == "6"
+
+- name: Get check_mk details 
+  shell: cat /etc/xinetd.d/check-mk-agent
+  register: check_mk_details_rhel7
+  when: ansible_distribution_major_version == "7"
+
+- name: Check if xinetd is enabled 
+  shell: service xinetd status
+  register: xinetd_details

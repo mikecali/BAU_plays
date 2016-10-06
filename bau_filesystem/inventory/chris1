@@ -1,0 +1,6 @@
+[ALL]
+chrisc1 ansible_ssh_host=172.17.203.58
+
+[ALL:vars]
+ansible_ssh_private_key_file=/home/christiana/.ssh/rhel_insecure_private
+

@@ -1,0 +1,60 @@
+---
+ - name: Unix Support Account
+   shell: grep "{{ item }}" /etc/passwd | awk -F':' '{ print $1 ":" $5 }'
+   register: unix_support_user
+   ignore_errors: True
+   with_items: "{{ unix_support_users }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - security
+
+ - name: Unix Project Account
+   shell: grep "{{ item }}" /etc/passwd | awk -F':' '{ print $1 ":" $5 }' 
+   register: unix_proj_user
+   ignore_errors: True
+   with_items: "{{ unix_proj_users }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - security
+
+ - name: SSH config check
+   shell: grep ^"{{ item }}" /etc/ssh/sshd_config
+   become: true
+   become_user: root
+   register: ssh_list
+   ignore_errors: True
+   with_items: "{{ ssh_lists }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - security
+
+ - name: SSH root key
+   shell: file /root/.ssh/"{{ item }}"
+   become: true	
+   become_user: root
+   register: root_key
+   ignore_errors: True
+   with_items: "{{ root_keys }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - security
+
+ - name: SELinux check
+   shell: getenforce
+   become: true	
+   become_user: root
+   register: selinux
+   ignore_errors: True
+   when: ansible_os_family == "RedHat"
+   tags:
+     - security
+
+ - name: Iptables check
+   shell: service iptables status
+   become: true	
+   become_user: root
+   register: iptables
+   ignore_errors: True
+   when: ansible_os_family == "RedHat"
+   tags:
+     - security

@@ -1,0 +1,3 @@
+---
+# defaults file for cron
+cron_users_allowed: {}

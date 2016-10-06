@@ -1,0 +1,10 @@
+---
+ - name: Check Patching 
+   shell: yum repolist
+   become: true
+   become_user: root
+   register: patching_repo
+   ignore_errors: True
+   when: ansible_os_family == "RedHat"
+   tags:
+     - patching

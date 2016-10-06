@@ -1,0 +1,12 @@
+    user_groups:
+      - { name: astro, system: False, gid: 1200, state: present }
+      - { name: burle, system: False, gid: 1201, state: present }
+
+    user_add:
+      # Extra users to be defined
+      - { name: dolores, comment: "dolores day", group: "users", append: yes}
+
+    user_add_ssh:
+      # Extra users to be defined
+      - { name: heathcliff, uid: 1206, comment: "heathcliff webb", group: "sysadmin", password: "{{ 'Blanker9!' | password_hash('sha512') }}" , update_password: on_create, append: yes, generate_ssh_key: yes, ssh_key_type: rsa, ssh_key_bits: 2048, ssh_key_file: .ssh/id_rsa }
+      #

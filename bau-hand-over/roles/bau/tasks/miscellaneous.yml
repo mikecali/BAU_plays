@@ -1,0 +1,36 @@
+---
+ - name: Check Miscellaneous package installed
+   shell: rpm -q "{{ item }}" 
+   register: misc_pkg
+   ignore_errors: True
+   with_items: "{{ misc_pkgs }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - miscellaneous
+
+ - name: Miscellaneous System Daemon started and running
+   shell: service "{{ item }}" status
+   register: misc_status
+   ignore_errors: True
+   with_items: "{{ misc_stat }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - miscellaneous   
+
+ - name: Miscellaneous daemon startup config
+   shell: chkconfig --list | grep "{{ item }}" | awk '{ print $5 }'
+   register: misc_starts
+   ignore_errors: True
+   with_items: "{{ misc_start }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - miscellaneous
+
+ - name: Miscellaneous DNS check
+   shell: nslookup "{{ item }}"
+   register: misc_dnss
+   ignore_errors: True
+   with_items: "{{ misc_dns }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - miscellaneous

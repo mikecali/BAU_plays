@@ -1,0 +1,6 @@
+---
+#1st cycle (excludes samba and kernel)
+#os_update_exclusions: kernel*,samba4*
+
+#2nd cycle (excludes samba only)
+os_update_exclusions: samba4*

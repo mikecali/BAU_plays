@@ -1,0 +1,71 @@
+# tasks file for user
+---
+- name: users | add / delete
+  user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default('') }}"
+    group: "{{ item.group | default(item.name) }}"
+    groups: "{{ item.groups | default([]) | join(',') }}"
+    append: "{{ item.append | default(false) }}"
+    password: "{{ item.password | default('*') }}"
+    update_password: "{{ item.update_password | default('always') }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    home: "{{ item.home | default(('/' if item.name == 'root' else '/home/') + item.name) }}"
+    system: "{{ item.system | default(false) }}"
+    state: "{{ item.state | default('present') }}"
+    remove: "{{ item.remove | default(false) }}"
+    when: item.uid is not defined
+    with_items: user_users
+    tags:
+      - user-users-no-gid
+    register: user_created
+
+
+- name: users | add / delete (SSH Keys)
+  user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default('') }}"
+    group: "{{ item.group | default(item.name) }}"
+    groups: "{{ item.groups | default([]) | join(',') }}"
+    append: "{{ item.append | default(false) }}"
+    password: "{{ item.password | default('*') }}"
+    update_password: "{{ item.update_password | default('always') }}"
+    generate_ssh_key: "{{ item.generate_ssh_key | default('no') }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    home: "{{ item.home | default(('/' if item.name == 'root' else '/home/') + item.name) }}"
+    system: "{{ item.system | default(false) }}"
+    state: "{{ item.state | default('present') }}"
+    remove: "{{ item.remove | default(false) }}"
+  when: item.uid is defined and isjumphost is defined and isjumphost
+  with_items: user_users
+  tags:
+    - user-users-gid
+  register: user_created
+
+- name: users | add / delete (No SSH Keys)
+  user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default('') }}"
+    group: "{{ item.group | default(item.name) }}"
+    groups: "{{ item.groups | default([]) | join(',') }}"
+    append: "{{ item.append | default(false) }}"
+    password: "{{ item.password | default('*') }}"
+    update_password: "{{ item.update_password | default('always') }}"
+    generate_ssh_key: "no"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    home: "{{ item.home | default(('/' if item.name == 'root' else '/home/') + item.name) }}"
+    system: "{{ item.system | default(false) }}"
+    state: "{{ item.state | default('present') }}"
+    remove: "{{ item.remove | default(false) }}"
+  when: item.uid is defined and isjumphost not defined
+  with_items: user_users
+  tags:
+    - user-users-gid
+  register: user_created
+
+# Save ssh keys
+# - name: capture ssh keys to common location
+#  debug: msg="uuu {{ user_users.name }} vvv"
+#  with_items: user_users
+# when: isjumphost is defined and isjumphost
+#  when: item.state == "present"

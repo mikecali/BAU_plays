@@ -1,0 +1,10 @@
+---
+project_name: NAC
+gitlab_url: https://git.env.care/datacom-chorus/chorus-infra
+playbook_name: playbooks/build_asbuilt.yml
+client_name: Chorus
+git_repo_location: ../../inventory/as-built/
+playbook_create_vm: ansible-playbook playbooks/nac/guest-create.yml
+playbook_build_os: ansible-playbook playbooks/nac/build-environment.yml -i inventory/nac --extra-vars "ansible_ssh_private_key_file=<insecure_key/secure_key>"
+playbook_hardening: ansible-playbook playbooks/nac/security_hardening.yml -i inventory/nac --extra-vars "ansible_ssh_private_key_file=<secure_key>"
+playbook_asbuilt: ansible-playbook playbooks/nac/asbuilt-create.yml -i inventory/nac --extra-vars "ansible_ssh_private_key_file=<secure_key>"

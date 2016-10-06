@@ -1,0 +1,13 @@
+---
+#cron.allow sub task for cron role
+- block:
+  - name: Copy template of /etc/cron.allow
+    template:
+      src: cron.allow.j2
+      dest: /etc/cron.allow
+      owner: root
+      group: root
+      mode: 0600
+    when: cron_users_allowed is defined
+  tags:
+  - cron_allow

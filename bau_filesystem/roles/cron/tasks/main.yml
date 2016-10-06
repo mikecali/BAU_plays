@@ -1,0 +1,7 @@
+---
+# tasks file for cron
+- block:
+  - include: cron_allow.yml
+  - include: cron_job.yml
+  tags:
+  - cron_role

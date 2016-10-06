@@ -1,0 +1,35 @@
+---
+# tasks file for at_job_sudo
+- block:
+
+## example: sudo_access variable for sudo root access
+# ALL=(ALL) PASSWD: ALL
+
+## example: sudo_access variable for sudo to a user
+# ALL=/bin/su - oracle
+
+## sudo_access variable for sudo command access
+# ALL=(ALL) PASSWD: /usr/sbin/tcpdump 
+  - name: Install package using yum
+    yum: 
+      name: at
+      state: present
+    with_items: package
+    register: install
+    when: ansible_distribution == 'RedHat'
+
+  - name: Start/Restart service
+    service: 
+      name: atd
+      state: restarted
+      enabled: yes
+    with_items: service
+    when: ansible_distribution == 'RedHat' and install.changed
+
+  - name: Create file in /etc/sudoers.d
+    shell: at {{ item.start_time }} {{ item.start_date }} <<< "echo '{{ item.user }} {{ item.sudo_access }}' > /etc/sudoers.d/{{ item.sudoer_file }}"
+    with_items: sudo_add
+
+  - name: Delete sudoers file in /etc/sudoers.d
+    shell: at {{ item.end_time }} {{ item.end_date }} <<< "rm -f /etc/sudoers.d/{{ item.sudoer_file }}"
+    with_items: sudo_remove

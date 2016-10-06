@@ -1,0 +1,24 @@
+---
+# Filesystem variables
+# Accepted values is true or false
+disk_new: false
+disk_increase: true
+vg_create: false
+vg_extend: false
+filesystem_new: false
+filesystem_increase: true
+
+volume_groups:
+  - { vg: vg_data, pvs: /dev/sdc }
+
+# if you want to resize, you must specify a fixed (final) size.
+# size: The size of the logical volume, according to lvcreate(8) --size, by default in megabytes or optionally with one of [bBsSkKmMgGtTpPeE] units; or according to lvcreate(8) --extents as a percentage of [VG|PVS|FREE]; Float values must begin with a digit. Resizing using percentage values was not supported prior to 2.1
+# ie.
+#   - { vg: vg_data, lv: data, size: 100%VG }
+#   - { vg: vg_data, lv: data, size: 5g }
+volumes:
+  - { vg: vg_data, lv: lv_data, size: 4g }
+
+# fstype and opts are disregarded for filesystem increase
+filesystems:
+  - { mount: /data, fstype: ext4, dev: /dev/vg_data/lv_data, opts: "defaults" }

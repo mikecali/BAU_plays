@@ -1,0 +1,107 @@
+---
+# List of Security checks
+ssh_lists:
+ - PermitRootLogin
+ 
+
+host_lists:
+ - hosts.allow
+ - host.deny
+ 
+root_keys:
+ - authorized_keys
+
+# List of Unix Support users to be verify that should exist
+unix_support_users:
+ - ariely
+ - rhel
+ - user1
+ - user2
+ - user3
+ - support1
+ - support2
+ 
+# List of Project Support users to verify has been removed
+unix_proj_users:
+ - proj1
+ - proj2
+ - proj3
+ - proj4
+ - proj5
+ - proj6
+
+# List of monitoring packages
+monitoring_pkgs:
+ - nrpe
+ - check-mk-agent
+ - net-snmp
+ 
+# List of running monitoring agent
+monitoring_stat:
+ - nrpe
+ - check-mk
+ - snmpd
+
+# List daemon is meant to auto start
+monitoring_start:
+ - nrpe
+ - check-mk
+ - snmpd
+# List of backup packages
+backup_pkgs:
+ - netbackup
+
+# List of running backup agent
+backup_stat:
+ - netbackup
+
+# List of running backup config
+backup_start:
+ - netbackup
+ 
+# Daily checks packages
+dailychk_pkgs:
+ - cfgenie-linux
+ - cfgenie-acc
+ 
+# List of Miscellaneous checks
+misc_pkgs:
+ - cronie
+ - net-snmp
+ - ntp
+ - iptables
+ - rsyslog
+ - selinux-policy
+ - postfix
+ - audit
+ - mailx
+
+misc_stat:
+ - crond
+ - snmpd
+ - ntpd
+ - iptables
+ - rsyslog
+ - sestatus
+ - postfix
+ - auditd
+
+misc_start:
+ - crond
+ - snmpd
+ - ntpd
+ - iptables
+ - rsyslog
+ - postfix
+ - auditd
+
+misc_dns:
+ - www.hau.edu.ph
+ - www.stuff.co.nz
+ - www.arielx.co.nz
+ 
+misc_chk:
+ - getent hosts ariel1
+ - echo "This is a test mail" | mailx -s "Test mail from $HOSTNAME" ariel.yumul@datacom.co.nz
+ 
+ 

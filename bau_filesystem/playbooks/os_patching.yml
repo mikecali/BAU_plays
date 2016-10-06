@@ -1,0 +1,14 @@
+---
+- name: OS patching
+  hosts: all
+  become: yes
+
+  pre_tasks:
+    - include_vars: ../../vars/os_patching_vars.yml
+
+  roles:
+    - { role: os_patching }
+    - { role: build_asbuilt }
+...
+
+    

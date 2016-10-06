@@ -1,0 +1,88 @@
+---
+# tasks file for ctrl_alt_del
+# This will disabled shutdown when doing ctrl-alt-del from console.
+
+- block: 
+  - name: RHEL5 - Hash /etc/inittab
+    when: ansible_distribution_release == 'Tikanga'
+    replace: >
+      dest=/etc/inittab
+      regexp="^ca::ctrlaltdel:/sbin/shutdown.*$"
+      replace="#ca::ctrlaltdel:/sbin/shutdown -t3 -r now"
+    register: hash
+  
+  - name: RHEL5 - Make changes to the /etc/inittab effective without a reboot
+    shell: /sbin/init q
+    when: ansible_distribution_release == 'Tikanga' and hash.changed
+  
+  - name: RHEL5 - Grep ctrlaltdel line POST CHECK
+    when: ansible_distribution_release == 'Tikanga'
+    shell: grep 'ctrlaltdel' /etc/inittab
+    ignore_errors: yes
+    register: ctrlaltdel
+  
+  - name: RHEL5 - Grep ctrlaltdel line POST CHECK OUTPUT
+    when: ansible_distribution_release == 'Tikanga'
+    debug: msg={{ ctrlaltdel.stdout_lines }}
+  
+  - name: RHEL6 - Update upstart version to the latest
+    when: ansible_distribution_release == 'Santiago'
+    yum: name=upstart state=latest
+  
+  - name: RHEL6 - Check if control-alt-delete.override exist
+    stat: path=/etc/init/control-alt-delete.override
+    when: ansible_distribution_release == 'Santiago'
+    register: override_stat
+  
+  - name: RHEL6 - Copy control-alt-delete.conf to control-alt-delete.override (for upstart-0.6.5-12.el6 AND HIGHER)
+    when: ansible_distribution_release == 'Santiago' and override_stat.stat.exists == False
+    shell: "cp -p /etc/init/control-alt-delete.conf /etc/init/control-alt-delete.override"
+  
+  - name: RHEL6 - Replacing exec /sbin/shutdown to exec /usr/bin/logger (for upstart-0.6.5-12.el6 AND HIGHER)
+    when: ansible_distribution_release == 'Santiago'
+    replace: >
+      dest=/etc/init/control-alt-delete.override
+      regexp="^exec /sbin/shutdown.*$"
+      replace="exec /usr/bin/logger -p authpriv.notice -t init Ctrl-Alt-Del_was_pressed_and_ignored"
+  
+  - name: RHEL6 - Grep exec line
+    when: ansible_distribution_release == 'Santiago'
+    shell: grep exec /etc/init/control-alt-delete.override
+    register: override_logger
+  
+  - name: RHEL6 - Grep exec line OUTPUT
+    debug: msg={{ override_logger.stdout_lines }}
+    when: ansible_distribution_release == 'Santiago'
+  
+  - name: RHEL7 - Disable Ctrl-Alt-Del
+    when: ansible_distribution_release == 'Maipo'
+    shell: systemctl mask ctrl-alt-del.target
+    ignore_errors: yes
+    register: rhel7_ctrlaltdel
+  
+  - name: RHEL7 - Disable Ctrl-Alt-Del OUTPUT
+    when: ansible_distribution_release == 'Maipo'
+    debug: msg={{ rhel7_ctrlaltdel.stdout_lines }}
+  
+  - name: SUSE - Hash /etc/inittab
+    when: ansible_os_family == 'Suse'
+    replace: >
+      dest=/etc/inittab
+      regexp="^ca::ctrlaltdel:/sbin/shutdown.*$"
+      replace="#ca::ctrlaltdel:/sbin/shutdown -t3 -r now"
+    register: hash
+  
+  - name: SUSE - Make changes to the /etc/inittab effective without a reboot
+    shell: /sbin/init q
+    when: ansible_os_family == 'Suse' and hash.changed
+  
+  - name: SUSE - Grep ctrlaltdel line POST CHECK
+    when: ansible_os_family == 'Suse'
+    shell: grep 'ctrlaltdel' /etc/inittab
+    ignore_errors: yes
+    register: ctrlaltdel
+  
+  - name: SUSE - Grep ctrlaltdel line POST CHECK OUTPUT
+    when: ansible_os_family == 'Suse'
+    debug: msg={{ ctrlaltdel.stdout_lines }}
+

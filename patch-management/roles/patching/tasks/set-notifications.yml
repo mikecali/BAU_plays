@@ -1,0 +1,4 @@
+- name: Disabling notification before patching.
+  shell: /var/lib/awx/projects/patch-management/roles/patching/library/monitoring.py -s nagios -d -m "Patching" -t {{item}}
+  with_items: "{{play_hosts}}"
+  delegate_to: localhost

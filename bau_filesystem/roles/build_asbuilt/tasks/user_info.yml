@@ -1,0 +1,5 @@
+- name: Get the user account details of each user
+  shell: chage -l {{ item }}
+  register: user_account_details
+  with_items: "{{ all_users.stdout_lines }}"
+  ignore_errors: true

@@ -1,0 +1,26 @@
+---
+# vg_create tasks file for filesystem
+## This task is used to create new volume group
+
+- block:
+  - name: List pvs and vgs - before
+    shell: "pvs; vgs"
+    register: pvs_vgs_1
+
+  - name: Show existing volume groups - before
+    debug: msg="{{ pvs_vgs_1.stdout_lines }}"
+
+  - name: Create Volume Groups
+    lvg:
+      vg: "{{ item.vg }}"
+      pvs: "{{ item.pvs }}"
+    with_items: volume_groups
+    when: volume_groups is defined
+    tags: ['disk', 'new']
+
+  - name: List pvs and vgs - after
+    shell: pvs; vgs
+    register: pvs_vgs_2
+
+  - name: Show existing volume groups - after
+    debug: msg="{{ pvs_vgs_2.stdout_lines }}"

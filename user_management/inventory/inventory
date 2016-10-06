@@ -1,0 +1,9 @@
+[jumphosts]
+iantest1
+
+[jumphosts:vars]
+isjumphost=true
+
+[development]
+iantest2
+

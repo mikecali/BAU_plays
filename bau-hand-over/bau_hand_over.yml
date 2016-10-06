@@ -1,0 +1,11 @@
+---
+#
+# Datacom BAU Handover Copyright 2016
+# created by: Ariel Yumul
+#
+ - hosts: ariel1
+   remote_user: rhel
+   become_user: root
+   become: yes
+   roles:
+     - bau

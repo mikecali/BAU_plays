@@ -1,0 +1,27 @@
+---
+# vg_extendtasks file for filesystem
+## This task is used to extend existing volume group
+
+- block:
+  - name: List pvs and vgs - before
+    shell: "pvs; vgs"
+    register: pvs_vgs_1
+
+  - name: Show existing volume groups - before
+    debug: msg="{{ pvs_vgs_1.stdout_lines }}"
+
+  - name: Create physycal volume
+    shell: pvcreate "{{ item.pvs }}"
+    with_items: volume_groups
+    
+  - name: Extend volume group to the new disk
+    shell: vgextend {{ item.vg }} {{ item.pvs }}
+    with_items: volume_groups
+
+  - name: List pvs and vgs - after
+    shell: "pvs; vgs"
+    register: pvs_vgs_2
+
+  - name: Show existing volume groups - after
+    debug: msg="{{ pvs_vgs_2.stdout_lines }}"
+    

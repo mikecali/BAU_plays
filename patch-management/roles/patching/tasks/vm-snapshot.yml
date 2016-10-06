@@ -1,0 +1,15 @@
+---
+- set_fact: farm=kdcwvc5001 
+  when: env == "Dev"
+- set_fact: farm=kdcwvc0001 
+  when: env == "Prod"
+- set_fact: farm=adcwvc0001
+  when: env == "Dr"
+- vm_snapshot:
+   vcenter_hostname: "{{farm}}"
+   user: "{{user_name}}"
+   password: "{{password}}"
+   vm_name: "{{item}}.ds.acc.co.nz"
+  with_items: play_hosts
+  delegate_to: localhost
+

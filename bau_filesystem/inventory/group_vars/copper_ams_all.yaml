@@ -1,0 +1,10 @@
+---
+project_name: Copper-AMS
+gitlab_url: https://git.env.care/datacom-chorus/chorus-infra
+playbook_name: playbooks/build_asbuilt.yml
+client_name: Chorus
+git_repo_location: ../../inventory/as-built/
+playbook_create_vm: ansible-playbook playbooks/copper-ams/guest-create.yml
+playbook_build_os: ansible-playbook playbooks/copper-ams/build-environment.yml -i inventory/copper-ams --extra-vars "ansible_ssh_private_key_file=<insecure_key/secure_key>"
+playbook_hardening: ansible-playbook playbooks/copper-ams/security_hardening.yml -i inventory/copper-ams --extra-vars "ansible_ssh_private_key_file=<secure_key>"
+playbook_asbuilt: ansible-playbook playbooks/copper-ams/asbuilt-create.yml -i inventory/copper-ams --extra-vars "ansible_ssh_private_key_file=<secure_key>"

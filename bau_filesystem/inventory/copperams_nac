@@ -1,0 +1,27 @@
+[copperams_nac:children]
+copperams_nac_prd
+copperams_nac_npe
+
+[copperams_nac_prd:children]
+copperams_prd
+nac_prd
+
+[copperams_nac_npe:children]
+copperams_npe
+nac_npe
+
+[copperams_prd]
+CSUXPRAPP360 #Copper AMS App Server 1 (PRD)
+CSUXPRAPP361 #Copper AMS App Server 2 (PRD)
+CSUXPRAPP362 #Copper AMS App Server 3 (PRD)
+
+[copperams_npe]
+CSUXNPAPP343 #Copper AMS App Server 1 (NPE)
+CSUXNPAPP344 #Copper AMS App Server 2 (NPE)
+CSUXNPAPP345 #Copper AMS App Server 3 (NPE)
+
+[nac_prd]
+CSUXPRAPP363 #NA-C App Server 1 (PRD)
+
+[nac_npe]
+CSUXNPAPP364 #NA-C App Server 1 (NPE)

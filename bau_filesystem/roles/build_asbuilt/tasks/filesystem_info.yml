@@ -1,0 +1,11 @@
+- name: Get fstab info
+  shell: cat /etc/fstab
+  register: fstab_info
+
+- name: Get mounts points 
+  shell: cat /proc/mounts 
+  register: mounts_points_info
+
+- name: List disk information
+  shell: df -Ph
+  register: disk_info

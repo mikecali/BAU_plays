@@ -1,0 +1,47 @@
+---
+# filesystem_new tasks file for filesystem
+## This task can create volume_groups, logical_volume, filesystem, mount points and mount filesystem
+
+- block:
+  - name: Check filesystem size
+    shell: df -Ph
+    register: show_fs1
+
+  - name: Show filesystem - before
+    debug: msg="{{ show_fs1.stdout_lines }}"
+
+  - name: Create data LVs on VG
+    lvol:
+      vg: "{{ item.vg }}"
+      lv: "{{ item.lv }}"
+      size: "{{ item.size }}"
+    with_items: volumes
+    when: volumes is defined
+    tags: ['disk', 'new']
+
+  - name: Create filesystems on data LV
+    filesystem:
+      fstype: "{{ item.fstype }}"
+      dev: "{{ item.dev }}"
+    with_items: filesystems
+    when: filesystems is defined
+    tags: ['disk', 'new']
+
+  - name: Mount data LVs
+    mount: >
+      name={{item.mount}}
+      src={{item.dev}}
+      fstype={{item.fstype}}
+      state=mounted
+      opts={{item.opts}}
+    with_items: filesystems
+    when: filesystems is defined
+    #tags: ['disk', 'new']
+    tags: mount_fs
+
+  - name: Check filesystem size
+    shell: df -Ph
+    register: show_fs2
+
+  - name: Show filesystem - after
+    debug: msg="{{ show_fs2.stdout_lines }}"

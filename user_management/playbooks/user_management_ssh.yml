@@ -1,0 +1,95 @@
+---
+- name: User management SSH - generate ssh keys
+  hosts: jumphosts
+  become: yes
+  vars_files:
+    - vars.yml 
+
+  roles:
+    - { role: user }
+
+- name: SSH Key file location
+  hosts: localhost
+  # become: yes
+  vars_files:
+    - vars.yml
+
+  tasks:
+  - name: Make sure directory exists
+    file:
+      path: /usr/local/ssh_lib/{{ item.name }}
+      state: directory
+      mode: 0777
+    with_items: user_add_ssh
+    when: usingjumphost is defined and usingjumphost == true
+    
+# Add all users
+- name: Specific user management (all hosts) 
+  hosts: all
+  become: yes
+  vars_files:
+    - vars.yml 
+  roles:
+    - { role: user }
+
+# Distirbute all SSH keys
+- name: SSH Key Collection and Distribution
+  hosts: jumphosts
+  become: yes
+  vars_files:
+    - vars.yml
+
+  tasks:
+  - name: Copy back ssh key file
+    fetch: src=/home/{{ item.name }}/.ssh/id_rsa.pub dest=/usr/local/ssh_lib/{{ item.name }}/ flat=yes
+    with_items: user_add_ssh
+    when: isjumphost is defined and usingjumphost is defined and usingjumphost == true
+    # when: /usr/local/etc/template.file.{{ ansible_hostname }}.stat.exists == true
+    #
+- name: Deploy out ssh key
+  hosts: all
+  become: yes
+  vars_files:
+  - vars.yml
+  
+  tasks:
+  - name: Rollout authorized ssh key
+    authorized_key:
+      user: "{{ item.name }}"
+      key: "{{ lookup('file','/usr/local/ssh_lib/{{item.name}}/id_rsa.pub') }}"
+    with_items: user_add_ssh
+    when: usingjumphost is defined and usingjumphost == true
+
+- name: Remote File management
+  hosts: jumphosts
+  become: yes
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Ensure directory exists for user Non-ssh
+      file:
+        path: /home/{{ item.name }}/.ssh
+        state: directory
+        owner: "{{ item.name }}"
+        group: "{{ item.group }}"
+      with_items: user_add
+      when: user_add is defined and usingjumphost is defined and usingjumphost == true
+
+    - name: Ensure directory exists for user ssh
+      file:
+        path: /home/{{ item.name }}/.ssh
+        state: directory
+        owner: "{{ item.name }}"
+        group: "{{ item.group }}"
+      with_items: user_add_ssh
+      when: user_add_ssh is defined and usingjumphost is defined and usingjumphost == true
+
+    - name: Copy out file (SSH)
+      copy: src=/usr/local/etc/template.file.{{ ansible_hostname }} dest=/home/{{ item.name }}/.ssh/config owner={{ item.name }} group={{ item.group }}
+      with_items: user_add_ssh
+      when: user_add_ssh is defined and usingjumphost is defined and usingjumphost == true
+      # when: /usr/local/etc/template.file.{{ ansible_hostname }}.stat.exists == true
+      #
+    
+...

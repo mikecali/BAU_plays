@@ -1,0 +1,13 @@
+---
+- name: User management
+  hosts: all
+  become: yes
+
+  pre_tasks:
+    - include_vars: ../../vars/user_vars.yml
+
+  roles:
+    - { role: user }
+...
+
+    

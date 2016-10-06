@@ -1,0 +1,13 @@
+---
+#Add a cron job
+- block:
+  - name: Add a cron job
+    cron:
+      name: "{{ item.name }}"
+      job: "{{ item.job }}"
+      minute: "{{ item.minute }}"
+      hour: "{{ item.hour }}"
+      user: "{{ item.user }}"
+    when: cron_job is defined
+    tags: cron_job_add
+    with_items: cron_job

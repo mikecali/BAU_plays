@@ -1,0 +1,14 @@
+---
+ - include: sysinfo.yml
+ - include: security.yml  
+ - include: monitoring.yml
+ - include: dailychecks.yml
+ - include: backup.yml
+ - include: patching.yml
+ - include: miscellaneous.yml
+ 
+ 
+ - name: Template file
+   template: src=bau_hand_over.md.j2 dest=/tmp/{{ client_name }}-{{ hostname.stdout }}.md
+
+ - include: report.yml

@@ -1,0 +1,8 @@
+---
+- name: Create satellite snapshot
+  rhn_snapshot:
+   satellite_url: "https://rhsatellite.ds.acc.co.nz/rpc/api"
+   user_name: "{{ user_name }}@ds"
+   password: "{{ password }}"
+   hostname: "{{ item }}"
+  with_items: play_hosts

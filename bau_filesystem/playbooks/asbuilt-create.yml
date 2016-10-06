@@ -1,0 +1,7 @@
+---
+- name: Create as-built
+  hosts: all
+  become: yes
+
+  roles:
+    - { role: build_asbuilt }

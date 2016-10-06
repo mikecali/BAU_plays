@@ -1,0 +1,15 @@
+- name: Get hardware general information
+  shell: lscpu
+  register: cpu_general_info
+
+- name: Get cpu processor info 
+  shell: cat /proc/cpuinfo 
+  register: cpu_processor_info
+
+- name: Get memory info
+  shell: free -m
+  register: memory_info
+
+- name: Get sector size of partition disk info 
+  shell: fdisk -l
+  register: sector_size_disk_info

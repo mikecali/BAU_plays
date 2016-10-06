@@ -1,0 +1,15 @@
+---
+user_users:
+  - { name: sup-520788, state: absent, remove: yes }
+  - { name: sup-520798, state: absent, remove: yes }
+  - { name: sup-520130, state: absent, remove: yes }
+  - { name: sup-520693, state: absent, remove: yes }
+  - { name: sup-520535, state: absent, remove: yes }
+  - { name: sup-520537, state: absent, remove: yes }
+  - { name: sup-520536, state: absent, remove: yes }
+  - { name: sup-520541, state: absent, remove: yes }
+  - { name: sup-520534, state: absent, remove: yes }
+  - { name: sup-520544, state: absent, remove: yes }
+  - { name: sup-520542, state: absent, remove: yes }
+  - { name: sup-520505, state: absent, remove: yes }
+  - { name: sup-520549, state: absent, remove: yes }

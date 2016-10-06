@@ -1,0 +1,4 @@
+---
+# defaults file for yum_package
+package: []
+service: []

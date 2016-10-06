@@ -1,0 +1,13 @@
+[copper_ams_all:children]
+copper_ams_prd
+copper_ams_npe
+
+[copper_ams_prd]
+CSUXPRAPP360 #Copper AMS App Server 1 (PRD)
+CSUXPRAPP361 #Copper AMS App Server 2 (PRD)
+CSUXPRAPP362 #Copper AMS App Server 3 (PRD)
+
+[copper_ams_npe]
+CSUXNPAPP343 #Copper AMS App Server 1 (NPE)
+CSUXNPAPP344 #Copper AMS App Server 2 (NPE)
+CSUXNPAPP345 #Copper AMS App Server 3 (NPE)

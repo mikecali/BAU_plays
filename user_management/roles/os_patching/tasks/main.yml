@@ -1,0 +1,207 @@
+---
+# tasks file for os_patching
+- hosts: all
+  vars:
+    os_update_exclusions: kernel*,samba4*
+
+  tasks:
+
+  - name: CHECK if etc backup file exist
+    become: yes
+    become_user: root
+    shell: "ls /dnz_support/pre-patch-bkp | grep `date +%Y-%m-%d` | grep etc"
+    register: etc_backup
+    ignore_errors: yes
+
+  - name: Pre-patch backup of /etc
+    shell: "mkdir /dnz_support/pre-patch-bkp; tar -czf /dnz_support/pre-patch-bkp/etc.`date +%Y-%m-%d`.tgz /etc"
+    become: yes
+    become_user: root
+    register: backup_etc_output
+    when: etc_backup.stdout == ""
+    ignore_errors: yes
+
+  - name: COPY config_check.sh script
+    copy: src=config_check.sh dest=/dnz_support/config_check.sh owner=root mode=0755
+    become: yes
+    become_user: root
+    register: config_check_copy
+    ignore_errors: yes
+    tags: reboot_only
+
+  - name: Check if prepatch file exist
+    become: yes
+    become_user: root
+    shell: "ls /dnz_support/pre-patch-bkp | grep `date +%Y-%m-%d` | grep prepatch"
+    register: prepatch_check
+    ignore_errors: yes
+    tags: prepatch_check
+    tags: reboot_only
+
+  - name: Pre-patch run config_check.sh
+    shell: "/dnz_support/config_check.sh > /dnz_support/pre-patch-bkp/prepatch.`date +%Y-%m-%d`.txt"
+    become: yes
+    become_user: root
+    register: config_check_prepatch
+    when: prepatch_check.stdout == ""
+    ignore_errors: yes
+    tags: reboot_only
+
+  - name: PROMPT Pre-patch reboot
+    pause: prompt="This will reboot the server (pre-patch). Do you want to proceed? Press (Enter) to continue or Press (ctrl+C) to Abort"
+
+  - name: Pre-patch Restart Machine
+    shell: /sbin/shutdown -r now "OS patching triggered, pre-patch reboot"
+    async: 1
+    poll: 0
+    ignore_errors: true
+
+#  - name: Pre-patch Wait time for rebooting hosts
+#    pause: seconds=180
+
+  - name: Pre-patch Wait for hosts to come back
+    local_action: wait_for host={{ inventory_hostname }}
+                  port=22
+                  state=started
+                  delay=100
+                  timeout=3600
+    become: false
+
+  - name: PROMPT Pre-patch reboot completed
+    pause: prompt="Server/s has been rebooted. Please ask APP/DB people to check. Press (Enter) to continue or Press (ctrl+C) to Abort"
+
+  - name: Clean repo
+    shell: "yum clean all"
+    become: yes
+    become_user: root
+    register: repo_clean
+
+  - name: Update Repo
+    shell: "yum repolist"
+    become: yes
+    become_user: root
+    register: repo_update
+
+  - name: Output repolist
+    debug: msg={{ repo_update.stdout_lines }}
+
+  - name: PROMPT Check repo
+    pause: prompt="Make sure you are you are using the correct repo. Press (Enter) to continue or Press (ctrl+C) to Abort"
+
+  - name: Check updates
+    shell: "yum check-update --exclude={{os_update_exclusions}}"
+    become: yes
+    become_user: root
+    ignore_errors: yes
+    register: before
+
+  - name: Output check-update - BEFORE
+    debug: msg={{ before.stdout_lines }}
+
+  - name: PROMPT Check packages (check-update) and proceed to patch
+    pause: prompt="Please check the packages to be updated. Are you sure you want to proceed to patch the server? There is no turning back. Press (Enter) to continue or Press (ctrl+C) to Abort"
+
+  - name: Update OS packages to the latest as per RHS with exclusions
+    yum: name=* state=latest exclude={{os_update_exclusions}}
+    become: yes
+    become_user: root
+    register: update
+
+  - name: PROMPT Post-patch reboot
+    pause: prompt="This will reboot the server (post-patch). Do you want to proceed? Press (Enter) to continue or Press (ctrl+C) to Abort"
+    tags: reboot_only
+
+  - name: Post-patch Restart Machine
+    shell: /sbin/shutdown -r now "OS patching triggered, post-patch reboot"
+    async: 1
+    poll: 0
+    ignore_errors: true
+    tags: reboot_only
+
+#  - name: Post-patch Wait time for rebooting hosts
+#    pause: seconds=90
+#    tags: reboot_only
+
+  - name: Post-patch Wait for hosts to come back
+    local_action: wait_for host={{ inventory_hostname }}
+                  port=22
+                  state=started
+                  delay=100
+                  timeout=3600
+    become: false
+    tags: reboot_only
+
+  - name: Check updates - AFTER
+    shell: "yum check-update --exclude={{os_update_exclusions}}"
+    become: yes
+    become_user: root
+    ignore_errors: yes
+    register: after
+
+  - name: Output check-update AFTER
+    debug: msg={{ after.stdout_lines }}
+
+  - name: Check if postpatch file exist
+    become: yes
+    become_user: root
+    shell: "ls /dnz_support/pre-patch-bkp | grep `date +%Y-%m-%d` | grep postpatch"
+    register: postpatch_check
+    ignore_errors: yes
+    tags: postpatch_check
+    tags: reboot_only
+
+  - name: Post-patch run config_check.sh
+    shell: "/dnz_support/config_check.sh > /dnz_support/pre-patch-bkp/postpatch.`date +%Y-%m-%d`.txt"
+    become: yes
+    become_user: root
+    register: config_check_postpatch
+    ignore_errors: yes
+    #when: postpatch_check.stdout == ""
+    tags: reboot_only
+
+  - name: Capture prepatch filename for diff
+    become: yes
+    become_user: root
+    shell: "ls /dnz_support/pre-patch-bkp | grep `date +%Y-%m-%d` | grep prepatch"
+    register: prepatch_check_2
+    ignore_errors: yes
+    tags: prepatch_check_2
+    tags: reboot_only
+
+  - name: Capture postpatch filename for diff
+    become: yes
+    become_user: root
+    shell: "ls /dnz_support/pre-patch-bkp | grep `date +%Y-%m-%d` | grep postpatch"
+    register: postpatch_check_2
+    ignore_errors: yes
+    tags: postpatch_check_2
+    tags: reboot_only
+
+  - name: CHECK if config_check.sh exist
+    become: yes
+    become_user: root
+    stat: path=/dnz_support/config_check.sh
+    register: config_check_stat
+    tags: reboot_only
+
+  - name: DELETE config_check.sh script
+    become: yes
+    become_user: root
+    file: path=/dnz_support/config_check.sh state=absent
+    when: config_check_stat.stat.exists == True
+    tags: reboot_only
+
+  - name: DIFF
+    shell: "diff /dnz_support/pre-patch-bkp/{{ prepatch_check_2.stdout }} /dnz_support/pre-patch-bkp/{{ postpatch_check_2.stdout }}"
+    become: yes
+    become_user: root
+    register: diff
+    ignore_errors: yes
+    tags: diff
+    tags: reboot_only
+
+  - name: Output POST-PATCH DIFF
+    debug: msg={{ diff.stdout_lines }}
+    tags: diff_output
+    tags: reboot_only
+

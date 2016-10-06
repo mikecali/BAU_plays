@@ -1,0 +1,4 @@
+---
+ - name: Get hostname
+   shell: hostname 
+   register: hostname

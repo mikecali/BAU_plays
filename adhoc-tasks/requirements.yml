@@ -1,0 +1,6 @@
+---
+
+- src: git+git@gitlab.com:datacom-devops/ngito-ansible-ssh-keys.git
+- src: git+git@gitlab.com:datacom-devops/ngito-ansible-iptables-role.git
+  # version: cb708848 # Ansible doesn't allow using a branch name here unfortunately
+# - name: retr0h.logrotate

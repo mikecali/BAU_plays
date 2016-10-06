@@ -1,0 +1,5 @@
+---
+sudo_add:
+  - { user: sup-test1, sudo_access: 'ALL=(ALL) PASSWD: ALL', sudoer_file: test, start_time: '09:57', start_date: 08/16/2016 }
+sudo_remove:
+  - { sudoer_file: test, end_time: '09:59', end_date: 08/16/2016 }

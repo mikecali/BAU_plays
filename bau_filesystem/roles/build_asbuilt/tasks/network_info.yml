@@ -1,0 +1,25 @@
+- name: Get interfaces and configuration file 
+  shell: cat /etc/sysconfig/network-scripts/ifcfg-eth0
+  register: interfaces_config_details_rhel6
+  when: ansible_distribution_major_version == "6"
+
+- name: Get interfaces and configuration file 
+  shell: cat /etc/sysconfig/network-scripts/ifcfg-ens32
+  register: interfaces_config_details_rhel7
+  when: ansible_distribution_major_version == "7"
+
+- name: Get DNS configuration
+  shell: cat /etc/resolv.conf
+  register: dns_config_details
+
+- name: Get routing info 
+  shell: netstat -rn
+  register: routing_info
+
+- name: Get host file information 
+  shell: cat /etc/hosts 
+  register: host_file_info
+
+- name: Get IP forwarding details 
+  shell: cat /proc/sys/net/ipv4/ip_forward
+  register: ip_forwarding_details

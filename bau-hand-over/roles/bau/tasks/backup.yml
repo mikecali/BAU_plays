@@ -1,0 +1,27 @@
+---
+ - name: Check Backup package installed
+   shell: rpm -q "{{ item }}" 
+   register: backup_pkg
+   ignore_errors: True
+   with_items: "{{ backup_pkgs }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - backup
+
+ - name: Check Backup agent
+   shell: service "{{ item }}" status
+   register: backup_status
+   ignore_errors: True
+   with_items: "{{ backup_stat }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - backup
+
+ - name: Backup daemon startup config
+   shell: chkconfig --list | grep "{{ item }}" | awk '{ print $5 }'
+   register: backup_starts
+   ignore_errors: True
+   with_items: "{{ backup_start }}"
+   when: ansible_os_family == "RedHat"
+   tags:
+     - backup

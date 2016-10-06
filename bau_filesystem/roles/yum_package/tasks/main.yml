@@ -1,0 +1,21 @@
+---
+# tasks file for yum_package
+- block:
+  - name: Install package using yum
+    yum: 
+      name: "{{ item.name }}"
+      state: "{{ item.state }}"
+    with_items: package
+    register: install
+    when: ansible_distribution == 'RedHat'
+
+  - name: Start/Restart service
+    service: 
+      name: "{{ item.name }}"
+      state: "{{ item.state }}"
+      enabled: "{{ item.enabled }}"
+    with_items: service
+    when: ansible_distribution == 'RedHat' and install.changed
+
+  tags:
+  - package_role

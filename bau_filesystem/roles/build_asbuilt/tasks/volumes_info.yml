@@ -1,0 +1,27 @@
+- name: Get LVM version number
+  shell: rpm -qa | grep lvm
+  register: lvm_version_details
+
+- name: Get Volume Group list short
+  shell: vgs 
+  register: vg_short_details
+
+- name: Get Volume Group List Detailed 
+  shell: vgdisplay -v 
+  register: vg_info
+
+- name: Get Logical Volume Group list short
+  shell: lvs 
+  register: lv_short_details
+
+- name: Get Logical Volume Group List Detailed 
+  shell: lvdisplay -v 
+  register: lv_info
+
+- name: Get Physical Volumes Info 
+  shell: pvs 
+  register: pv_info
+
+- name: Get partition details for volumes 
+  shell: cat /proc/partitions
+  register: partition_info

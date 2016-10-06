@@ -1,0 +1,8 @@
+---
+# defaults file for bau hand over
+project_name: bau-hand-over
+gitlab_url: https://git.env.care/datacom-dao/dao-infra
+playbook_name: playbooks/bau_hand_over.yml
+inventory_location: inventory/bau_hand_over/as_built
+client_name: Customs
+git_repo_location: /tmp/

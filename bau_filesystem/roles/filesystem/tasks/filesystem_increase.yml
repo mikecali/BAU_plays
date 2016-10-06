@@ -1,0 +1,36 @@
+---
+# filesystem_incease tasks file for filesystem
+## This task is used to increase an existing filesystem
+
+- block:
+  - name: Check filesystem size
+    shell: df -Ph {{ item.mount }}
+    register: show_fs1
+    with_items: filesystems
+
+  - name: Show filesystem - before
+    debug: msg="{{ show_fs1.results }}"
+    
+  - name: Resize Physical Volume (PV)
+    shell: pvresize "{{ item.pvs }}"
+    with_items: volume_groups
+    when: vg_extend == False
+
+  - name: Extend logical volume (Final size)
+    lvol:
+      vg: "{{ item.vg }}"
+      lv: "{{ item.lv }}"
+      size: "{{ item.size }}"
+    with_items: volumes
+    
+  - name: Resize filesystem
+    shell: resize2fs {{ item.dev }}
+    with_items: filesystems
+
+  - name: Check filesystem size
+    shell: df -Ph {{ item.mount }}
+    register: show_fs2
+    with_items: filesystems
+    
+  - name: Show filesystem - after
+    debug: msg="{{ show_fs2.results }}"

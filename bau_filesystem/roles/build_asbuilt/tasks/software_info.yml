@@ -1,0 +1,3 @@
+- name: Get the general package details
+  shell: rpm -qa
+  register: all_packages_details
