@@ -1,4 +1,4 @@
-This Repo is for UDM Ansible Initiative under UDM SIP sponsored by UDM
+This Repo a BAU-REPO
 ==============================================
 
 SIP Summary and Background
